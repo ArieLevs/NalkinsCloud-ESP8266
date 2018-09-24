@@ -21,8 +21,119 @@ void startHTTPServer() {
   else
     if (DEBUG)
       Serial.println("MDNS failed to start");
+      
+  handleGeneralSaved();
 
-  /*
+  handleAutoConfig();
+  
+  handleReturnId();
+  
+  handleAdminPage();
+  
+  server.on( "/generalSettings", []() {  //General configs, will show device ID, version etc and allow storing new device password
+    if (DEBUG)
+      Serial.println("Return generalSettings.html page"); 
+    server.send_P( 200, "text/html", PAGE_GeneralSettings );   
+  });
+  
+
+  
+  server.on( "/configNetwork", []() {
+    if (DEBUG)
+      Serial.println("Running configNetwork.html page"); 
+    server.send_P( 200, "text/html", PAGE_NetworkConfiguration );   
+  });
+  
+  handleConfigSaved();
+
+  /**
+   * Once http://DEVICEIP/info is accessed it will return information page containing
+   * Wifi connection status, SSID, IP, Netmask, Gateway and mac address
+   */
+  server.on( "/info", []() { 
+    Serial.println("info.html"); 
+    server.send_P( 200, "text/html", PAGE_Information );   
+  });
+
+  /**
+   * Once http://DEVICEIP/restart is accessed it will restart the device
+   */
+  server.on( "/restart", []() { 
+    Serial.println("restart.html"); 
+    server.send_P( 200, "text/html", PAGE_Restart );
+    ESP.restart();
+  });
+  
+  server.on( "/style.css", []() { Serial.println("style.css"); server.send_P( 200, "text/plain", PAGE_Style_css );  } );
+  server.on( "/microajax.js", []() { Serial.println("microajax.js"); server.send_P( 200, "text/plain", PAGE_microajax_js );  } );
+
+  /**
+   * Bellow url calls are made from HTTP pages 
+   * When client is to execute a function that should be run from the HTTP server (browser)
+   * The page is being redirected to the below URLs, each url will run the relevant function
+   */
+  server.on( "/admin/getnetworks", webServerGetAvailableNetworks );
+  server.on( "/admin/infovalues", webServerGetNetworkInfo );
+  server.on( "/admin/wifireconnect", webServerReconnectToWifi );
+  server.on( "/admin/mqttinfovalues", webServerGetMqttInfo );
+  server.on( "/admin/generalvalues", webServerGetGeneralConfigurationValues);
+  
+  server.onNotFound ( []() {
+    if (DEBUG)
+      Serial.println("Page Not Found");
+    server.send ( 400, "text/html", "Page not Found");
+  });
+  
+  server.begin(); // Start the HTTP server
+  
+  if (DEBUG)
+    Serial.println("HTTP Server Started");
+}
+
+void handleAdminPage() {
+   /*
+   * Once http://DEVICEIP/ is accessed it will return HTML code, with main menu
+   */
+  server.on ( "/", []() { //Main menu page
+    if (DEBUG)
+      Serial.println("Return admin.html page"); 
+    server.send_P( 200, "text/html", PAGE_AdminMainPage );
+  });
+}
+
+void handleReturnId() {
+    /*
+   * Once http://DEVICEIP/returnid is accessed it will return devices ID and TYPE
+   */
+  server.on("/returnid", HTTP_POST, [](){
+    if (DEBUG)
+       Serial.println("JSON returnid initiated");
+    StaticJsonBuffer<256> newBuffer;
+    // Get the request JSON body
+    JsonObject& jsonmsg = newBuffer.parseObject(server.arg("plain"));
+    jsonmsg.prettyPrintTo(wifiClientSecure);
+    if (DEBUG) {
+      Serial.println("Message received:");
+      Serial.println(server.arg("plain"));
+    }
+    // If message parse failed
+    if (!jsonmsg.success()) {
+      if (DEBUG)
+        Serial.println("Parsing failed");
+      server.send(200, "text/plain", "{\"status\":\"failed\",\"message\":\"message contains error(s), check json syntax\"}");
+      if (DEBUG)
+        Serial.println("/returnid returned error");
+    } else {
+      server.send(200, "text/plain", "{\"status\":\"success\", \"device_id\":\"" + deviceId + "\", \"device_type\":\"" + deviceType + "\"}");
+      if (DEBUG)
+        Serial.println("/returnid returned success");
+    }
+    delay(500);
+  });
+}
+
+void handleAutoConfig() {
+    /*
    * Once http://DEVICEIP/autoconfig is accessed it will try to parse a json syntax request
    * The request should contain the wifi SSID and password, device password for connecting to MQTT broker, brokers IP/Domain address and port
    * If all conditions are met, store received data to EEPROM storage
@@ -96,74 +207,9 @@ void startHTTPServer() {
         Serial.println("Autoconfig connection failed on WiFi connection");
     }
   });
+}
 
-  
-  /*
-   * Once http://DEVICEIP/returnid is accessed it will return devices ID and TYPE
-   */
-  server.on("/returnid", HTTP_POST, [](){
-    if (DEBUG)
-       Serial.println("JSON returnid initiated");
-    StaticJsonBuffer<256> newBuffer;
-    // Get the request JSON body
-    JsonObject& jsonmsg = newBuffer.parseObject(server.arg("plain"));
-    jsonmsg.prettyPrintTo(wifiClientSecure);
-    if (DEBUG) {
-      Serial.println("Message received:");
-      Serial.println(server.arg("plain"));
-    }
-    // If message parse failed
-    if (!jsonmsg.success()) {
-      if (DEBUG)
-        Serial.println("Parsing failed");
-      server.send(200, "text/plain", "{\"status\":\"failed\",\"message\":\"message contains error(s), check json syntax\"}");
-      if (DEBUG)
-        Serial.println("/returnid returned error");
-    } else {
-      server.send(200, "text/plain", "{\"status\":\"success\", \"device_id\":\"" + deviceId + "\", \"device_type\":\"" + deviceType + "\"}");
-      if (DEBUG)
-        Serial.println("/returnid returned success");
-    }
-    delay(500);
-  });
-  
-  /*
-   * Once http://DEVICEIP/ is accessed it will return HTML code, with main menu
-   */
-  server.on ( "/", []() { //Main menu page
-    if (DEBUG)
-      Serial.println("Return admin.html page"); 
-    server.send( 200, "text/html", PAGE_AdminMainPage );
-  });
-  
-  server.on( "/generalSettings", []() {  //General configs, will show device ID, version etc and allow storing new device password
-    if (DEBUG)
-      Serial.println("Return generalSettings.html page"); 
-    server.send ( 200, "text/html", PAGE_GeneralSettings );   
-  });
-  
-  server.on( "/generalSaved", []() { // Small redirect page that indicates that general configs been saved
-    if (DEBUG)
-      Serial.println("Running generalSaved.html page");
-    if ((server.arg("devicepassword").length() == 8) && (server.arg("username").length() <= 16)) { // If Password is in the length of 8 chars
-      writeStringToEEPROM(USERNAMESTARTADDR, server.arg("username")); // Save customers user name to EEPROM flash memory
-      writeStringToEEPROM(DEVICEPASSSTARTADDR, server.arg("devicepassword")); //Save the password to EEPROM flash memory
-      if (DEBUG)
-        Serial.println("User name and Device Password written to flash memory");
-      server.send( 200, "text/html", PAGE_GeneralSettingsSaved ); //And display small success redirect page
-    }
-    else // If password length not 8 chars just go back to main menu
-      if (DEBUG)
-        Serial.println("User name or Device Password are invalid - return to main menu page");
-      server.send( 200, "text/html", PAGE_AdminMainPage ); // TODO ############# CONSIDER WRITING GENERAL ERROR PAGE OR DO JAVA SCRIPT VALIDATION #############
-  });
-  
-  server.on( "/configNetwork", []() {
-    if (DEBUG)
-      Serial.println("Running configNetwork.html page"); 
-    server.send( 200, "text/html", PAGE_NetworkConfiguration );   
-  });
-  
+void handleConfigSaved() {
   server.on( "/configSaved", []() { 
     if (DEBUG)
       Serial.println("Running configSaved.html page");
@@ -191,51 +237,30 @@ void startHTTPServer() {
       }
     }
     writeNetworkConfigs(); // Write network configurations to EEPROM flash memory
-    server.send( 200, "text/html", PAGE_NetworkConfigurationSaved ); // Display small success redirect page
+    server.send_P( 200, "text/html", PAGE_NetworkConfigurationSaved ); // Display small success redirect page
     WiFi.disconnect();
     if (connectToWifi()) // While still inside configuration menu, try to reconnect to wifi with new parameters
       if (DEBUG)
         Serial.println("configSaved page connected to wifi");
   });
+}
 
-  /**
-   * Once http://DEVICEIP/info is accessed it will return information page containing
-   * Wifi connection status, SSID, IP, Netmask, Gateway and mac address
-   */
-  server.on( "/info", []() { 
-    Serial.println("info.html"); 
-    server.send ( 200, "text/html", PAGE_Information );   
-  });
-
-  /**
-   * Once http://DEVICEIP/restart is accessed it will restart the device
-   */
-  server.on( "/restart", []() { 
-    Serial.println("restart.html"); 
-    server.send ( 200, "text/html", PAGE_Restart );
-    ESP.restart();
-  });
-  
-  server.on( "/style.css", []() { Serial.println("style.css"); server.send ( 200, "text/plain", PAGE_Style_css );  } );
-  server.on( "/microajax.js", []() { Serial.println("microajax.js"); server.send ( 200, "text/plain", PAGE_microajax_js );  } );
-
-  /**
-   * Bellow url calls are made from HTTP pages 
-   * When client is to execute a function that should be run from the HTTP server (browser)
-   * The page is being redirected to the below URLs, each url will run the relevant function
-   */
-  server.on( "/admin/getnetworks", webServerGetAvailableNetworks );
-  server.on( "/admin/infovalues", webServerGetNetworkInfo );
-  server.on( "/admin/wifireconnect", webServerReconnectToWifi );
-  server.on( "/admin/mqttinfovalues", webServerGetMqttInfo );
-  server.on( "/admin/generalvalues", webServerGetGeneralConfigurationValues);
-  
-  server.onNotFound ( []() { Serial.println("Page Not Found"); server.send ( 400, "text/html", "Page not Found" );   }  );
-  
-  server.begin(); // Start the HTTP server
-  
+void handleGeneralSaved() {
+  server.on( "/generalSaved", []() { // Small redirect page that indicates that general configs been saved
   if (DEBUG)
-    Serial.println("HTTP Server Started");
+    Serial.println("Running generalSaved.html page");
+  if ((server.arg("devicepassword").length() == 8) && (server.arg("username").length() <= 16)) { // If Password is in the length of 8 chars
+    writeStringToEEPROM(USERNAMESTARTADDR, server.arg("username")); // Save customers user name to EEPROM flash memory
+    writeStringToEEPROM(DEVICEPASSSTARTADDR, server.arg("devicepassword")); //Save the password to EEPROM flash memory
+    if (DEBUG)
+      Serial.println("User name and Device Password written to flash memory");
+    server.send_P( 200, "text/html", PAGE_GeneralSettingsSaved ); //And display small success redirect page
+  }
+  else // If password length not 8 chars just go back to main menu
+    if (DEBUG)
+      Serial.println("User name or Device Password are invalid - return to main menu page");
+    server.send_P( 200, "text/html", PAGE_AdminMainPage ); // TODO ############# CONSIDER WRITING GENERAL ERROR PAGE OR DO JAVA SCRIPT VALIDATION #############
+  });
 }
 
 
