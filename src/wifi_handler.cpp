@@ -1,22 +1,47 @@
 
+#include "wifi_handler.h"
+#include "configs.h"
 
 //WIFI handlers
 WiFiEventHandler wifiConnectedHandler;
 WiFiEventHandler wifiDisconnectedHandler;
 
 
+void onWifiConnect(WiFiEventStationModeGotIP eventInfo) {
+    if (DEBUG) {
+        Serial.println();
+        Serial.print("Connected to ");
+        Serial.println(configs.wifiSsid.c_str());
+        Serial.print("IP address: ");
+        Serial.println(WiFi.localIP());
+        WiFi.printDiag(Serial);
+    }
+}
+
+
+void onWifiDisconected(WiFiEventStationModeDisconnected eventInfo) {
+    //WiFi.disconnect();
+    if (DEBUG) {
+        Serial.println("WiFi disconnected");
+        Serial.print("Will reconnect once '");
+        Serial.print(configs.wifiSsid.c_str());
+        Serial.println("' is avilable again");
+    }
+}
+
+
 /**
  * Connect to wifi network
  * If connection failed, or not established after 15 seconds return false, else return true
- * @return boolean  true - conencted successfully 
+ * @return boolean  true - conencted successfully
  *                  false - connection attemp last more then 15 seconds, or connection failed
  */
-boolean connectToWifi() {
+bool connectToWifi() {
   if(isWifiConnected())
     return true;
   if (DEBUG) {
     Serial.print("Starting WiFi connection to: ");
-    Serial.println(configs.wifiSsid);
+    Serial.println(configs.wifiSsid.c_str());
     Serial.print("Using MAC address: ");
     Serial.println(WiFi.macAddress());
   }
@@ -76,10 +101,8 @@ void reconnectToWifi() {
  * @return boolean  true - wifi status is connected
  *                  false - wifi status is disconnected
  */ 
-boolean isWifiConnected() {
-  if(WiFi.status() == WL_CONNECTED)
-    return true;
-  return false;
+bool isWifiConnected() {
+    return WiFi.status() == WL_CONNECTED;
 }
 
 
@@ -87,7 +110,7 @@ boolean isWifiConnected() {
  * Configure device wifi to start up as client mode
  */ 
 void setNormalOperetionMode() {
-  WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_STA);
 }
 
 
@@ -96,29 +119,29 @@ void setNormalOperetionMode() {
  * Function will set defualt gatway address of 10.0.0.1/24
  */ 
 void setConfigurationMode() {
-  //WiFi.disconnect();
-  WiFi.mode(WIFI_AP_STA);
-  delay(10);
+    //WiFi.disconnect();
+    WiFi.mode(WIFI_AP_STA);
+    delay(10);
 
-  //Set custom IP\subnet configurations
-  IPAddress ip(10,0,0,1);
-  IPAddress gateway(10,0,0,1); 
-  IPAddress subnet(255,255,255,0); 
-  WiFi.softAPConfig(ip, gateway , subnet);
-  delay(10);
+    //Set custom IP\subnet configurations
+    IPAddress ip(10,0,0,1);
+    IPAddress gateway(10,0,0,1);
+    IPAddress subnet(255,255,255,0);
+    WiFi.softAPConfig(ip, gateway , subnet);
+    delay(10);
 
-  //Start AP mode
-  WiFi.softAP(ACCESS_POINT_SSID, ACCESS_POINT_PASSWORD);
-  if (DEBUG) {
-    Serial.println("\nSoftAP started");
-    Serial.print("softAP IP address is (AP): ");
-    Serial.println(WiFi.softAPIP());
-    Serial.println("Please use this URL to connect:");
-    Serial.print("http://");
-    Serial.print(WiFi.softAPIP());
-    Serial.println("/");
-  }
-  delay(10);
+    //Start AP mode
+    WiFi.softAP(ACCESS_POINT_SSID, ACCESS_POINT_PASSWORD);
+    if (DEBUG) {
+        Serial.println("\nSoftAP started");
+        Serial.print("softAP IP address is (AP): ");
+        Serial.println(WiFi.softAPIP());
+        Serial.println("Please use this URL to connect:");
+        Serial.print("http://");
+        Serial.print(WiFi.softAPIP());
+        Serial.println("/");
+    }
+    delay(10);
 }
 
 
@@ -132,28 +155,6 @@ void initializeWifiHandlers() {
   wifiDisconnectedHandler = WiFi.onStationModeDisconnected(onWifiDisconected);
 }
 
-
-void onWifiConnect(WiFiEventStationModeGotIP eventInfo) {
-  if (DEBUG) {
-    Serial.println();
-    Serial.print("Connected to ");
-    Serial.println(configs.wifiSsid);
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    WiFi.printDiag(Serial);
-  }
-}
-
-
-void onWifiDisconected(WiFiEventStationModeDisconnected eventInfo) {
-  //WiFi.disconnect();
-  if (DEBUG) {
-    Serial.println("WiFi disconnected");
-    Serial.print("Will reconnect once '");
-    Serial.print(configs.wifiSsid);
-    Serial.println("' is avilable again");
-  }
-}
 
 long getWifiRSSI() { // RSSI (Received Signal Strength Indicator)
   return WiFi.RSSI();
@@ -182,6 +183,8 @@ int getWifiSignalStrength() {
     return 3;
   else if (wifiStrength < -70)
     return 4;
+  else
+      return 0;
 }
 
 

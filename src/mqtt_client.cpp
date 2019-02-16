@@ -1,4 +1,12 @@
-/*
+
+#include "Arduino.h"
+
+#include "mqtt_client.h"
+#include "configs.h"
+#include "sensors.h"
+#include "wifi_handler.h"
+
+ /*
  * Handles MQQT messaging
  */
 
@@ -28,7 +36,7 @@ void subscribeToMQTTBroker(const char* topic) {
  * @return boolean  true - successfully published message to server
  *                  false - failed to publish message
  */
-boolean publishMessageToMQTTBroker(const char* topic, char* message, boolean isRetainedMessage) {
+bool publishMessageToMQTTBroker(const char* topic, char* message, bool isRetainedMessage) {
   // publish function is: int publish (topic, payload, length, retained)
   // 'retained' is a constant, se in ConfigFile.h
   if (mqttClient.publish(topic, message, isRetainedMessage)) {
@@ -84,13 +92,13 @@ void callback(const char* topic, byte* payload, unsigned int length) {
  * @return boolean  true - connection AND verefications passed successfully
  *                  false - connection OR verefication failed
  */
-boolean checkMQTTconnection() {
+bool checkMQTTconnection() {
   if (DEBUG)
     Serial.println("Attempting MQTT connection...");
   if (connectToMQTTBroker()) { // Try to connect to the MQTT server
     if (DEBUG) {
       Serial.print("Successfully connected as: ");
-      Serial.println(deviceId);
+      Serial.println(deviceId.c_str());
     }
     if (checkMQTTSSL()) { // If connection was successful, check for servers SSL fingerprint
       if (DEBUG)
@@ -114,6 +122,24 @@ boolean checkMQTTconnection() {
 
 
 /**
+ * Generate topic contaning constat device id and type, with relevent value
+ *
+ * @param data last topic section
+ *
+ * @return String full topic (as of DEVICE_ID/DEVICE_TYPE/DATA)
+ */
+String generateTopic(String data) {
+    String result = "";
+    result += deviceId.c_str();
+    result += "/";
+    result += deviceType.c_str();
+    result += "/";
+    result += data;
+    return result;
+}
+
+
+/**
  * Connect to MQTT server
  * 
  * @return boolean  true - connected successfully 
@@ -130,13 +156,13 @@ boolean checkMQTTconnection() {
  * 4 : MQTT_CONNECT_BAD_CREDENTIALS - the username/password were rejected
  * 5 : MQTT_CONNECT_UNAUTHORIZED - the client was not authorized to connect
  */
-boolean connectToMQTTBroker() {
+bool connectToMQTTBroker() {
   // This is a LWT message, that will be sent if device loss connection to the server
   const char* willMessage = "offline";
   if (DEBUG) {
     Serial.println("Trying connection to MQTT broker");
     Serial.print("connecting to: ");
-    Serial.println(configs.mqttServer);
+    Serial.println(configs.mqttServer.c_str());
     Serial.print("Using port: ");
     Serial.println(configs.mqttPort);
     Serial.print("Using deviceId: ");
@@ -160,7 +186,6 @@ boolean connectToMQTTBroker() {
     Serial.print("Connection failed, status = ");
     Serial.println(mqttClient.state());
   }
-  Serial.println("BLABBBBBBBBBBBB");
   return false;
 }
 
@@ -171,10 +196,8 @@ boolean connectToMQTTBroker() {
  * @return boolean  true - MQTT server fingerprint verified
  *                  false - MQTT server fingerprint invalid
  */
-boolean checkMQTTSSL() {
-  if (wifiClientSecure.verify(fingerprint, (char*)configs.mqttServer.c_str()))
-    return true;
-  return false;
+bool checkMQTTSSL() {
+  return wifiClientSecure.verify(fingerprint.c_str(), (char*)configs.mqttServer.c_str());
 }
 
 
@@ -195,27 +218,10 @@ void disconnectFromMQTTBroker() {
  * @return boolean  true - client is connected
  *                  false - client is not connected
  */
-boolean isClientConectedToMQTTServer() {
+bool isClientConectedToMQTTServer() {
   return mqttClient.connected();
 }
 
-
-/**
- * Generate topic contaning constat device id and type, with relevent value
- * 
- * @param data last topic section 
- * 
- * @return String full topic (as of DEVICE_ID/DEVICE_TYPE/DATA)
- */
-String generateTopic(String data) {
-  String result = "";
-  result += deviceId;
-  result += "/";
-  result += deviceType;
-  result += "/";
-  result += data;
-  return result;
-}
 
 //Set time to "delay" a wifi signal strength publish message
 unsigned long wifiSignalPreviousPublish = 0;

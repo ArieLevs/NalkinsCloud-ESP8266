@@ -1,61 +1,72 @@
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
-#include <EEPROM.h>
-#include <PubSubClient.h>
-#include <ESP8266WiFi.h>
 
-#include "ConfigFile.h" //Configuration file
+#include <string>
+#include <Arduino.h>
 
-#include "HandleSensors_dht.h" // Load sensors global variables // THIS SHOULD BE CHANGED ON DEVICE CHANGE
+#include "eeprom_memory.h"
+#include "mqtt_client.h"
+#include "wifi_handler.h"
+#include "functions.h"
+#include "led_blinks.h"
+#include "http_server_handler.h"
 
-ESP8266WebServer server(80); 
-WiFiClientSecure wifiClientSecure;
-PubSubClient mqttClient;
+#include "configs.h" //Configuration file
+#include "sensors.h" // Load sensors global variables // THIS SHOULD BE CHANGED ON DEVICE CHANGE
 
-MDNSResponder mdns;
 
-boolean isConfigurationMode;
+bool isConfigurationMode;
 
 void setup(void) {
   delay(500);
-  if (DEBUG)
+  if (DEBUG) {
     Serial.begin(115200);
+    Serial.println("Starting NalkinsCloud Sensor");
+  }
 
+  initConfigs();
   setupSensorsGPIOs(); // Setup device GPIOs
     
-  EEPROM.begin(512); // Initiate flash rom with 512 bytes
+  initEEPROM();
   //clearEEPROM();  // Unmark to remove all data from EEPROM
     
   //Get current network and other info configurations from flash memory
   readNetworkConfigs(); // This will also return the wifi SSID and password
-  //configs.clientUsername = readStringFromEEPROM(USERNAMESTARTADDR);
+  configs.clientUsername = readStringFromEEPROM(USERNAMESTARTADDR);
   configs.devicePassword = readStringFromEEPROM(DEVICEPASSSTARTADDR);
   configs.mqttServer = readStringFromEEPROM(MQTTSERVERSTARTADDR);
-  configs.mqttPort = readStringFromEEPROM(MQTTPORTSTARTADDR);
+  configs.mqttPort = (uint16_t)atoi(readStringFromEEPROM(MQTTPORTSTARTADDR).c_str());
   //configs.mqttFingerprint = readFingerprintFromEEPROM(MQTTFINGERPRINTSTARTADDR);
-  
+
+  /**
+   * TEMPORATY
+   */
+  configs.mqttServer = "mosquitto.nalkins.cloud";
+  configs.mqttPort = 8883;
+  configs.devicePassword = "";
+  configs.wifiSsid = "";
+  configs.wifiPassword = "";
+
   if (DEBUG) {
     Serial.println("Server configs: ");
-    //Serial.print("Username: ");
-    //Serial.println(configs.clientUsername);
+    Serial.print("Username: ");
+    Serial.println(configs.clientUsername.c_str());
     Serial.print("Password: ");
-    Serial.println(configs.devicePassword);
+    Serial.println(configs.devicePassword.c_str());
     Serial.print("MQTT Host: ");
-    Serial.println(configs.mqttServer);
+    Serial.println(configs.mqttServer.c_str());
     Serial.print("MQTT Port: ");
     Serial.println(configs.mqttPort);
-    //Serial.print("MQTT Fingerprint: ");
-    //Serial.println(configs.mqttFingerprint);
+    Serial.print("MQTT Fingerprint: ");
+    Serial.println(configs.mqttFingerprint);
   }
 
   // Define general topic for this device
   generalTopic = deviceId + "/" + deviceType + "/";
   if (DEBUG) { 
     Serial.print("General topic is: ");
-    Serial.println(generalTopic);
+    Serial.println(generalTopic.c_str());
   }
     
-  mqttClient = PubSubClient((char*)configs.mqttServer.c_str(), configs.mqttPort.toInt(), callback, wifiClientSecure); //Setup the MQTT client
+  mqttClient = PubSubClient((char*)configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure); //Setup the MQTT client
   delay(10);
 
   isConfigurationMode = getConfigurationStatusFlag(); // Get current device work mode (Normal or configuraion)
@@ -70,8 +81,8 @@ void setup(void) {
           disconnectFromMQTTBroker();
           if (DEBUG)
             Serial.println("Connection tests passed successfully");
-            //WiFi.setAutoReconnect(false);
-            initializeWifiHandlers();
+          //WiFi.setAutoReconnect(false);
+          initializeWifiHandlers();
           return; // All tests successfull start main loop when NOT on configuration mode (isConfigurationMode = FALSE)
         } else
             if (DEBUG)
@@ -80,8 +91,10 @@ void setup(void) {
           if (DEBUG)
             Serial.println("MQTT Server Connection failed");
     } else
-        if (DEBUG)
-          Serial.println("Wifi failed connecting to: " + configs.wifiSsid);
+        if (DEBUG) {
+            Serial.println("Wifi failed connecting to: ");
+            Serial.print(configs.wifiSsid.c_str());
+        }
     isConfigurationMode = true; // If one of the 3 checks failed, start on configuration mode 
   }
   if (DEBUG)
@@ -96,16 +109,16 @@ void setup(void) {
 void loop(void){
   delay(50);
   if (isConfigurationMode) { // If device on configuration mode then handle http server
-    blinkConfigurationMode();
+    blinkConfigurationMode(LED_WORK_STATUS);
     server.handleClient();
   }
   else { // If device is on normal work mode
-    checkConfigurationButton(); // Check if user is pressing the configuration button for more than 5 seconds
+    checkConfigurationButton(CONFIGURATIONMODEBUTTON); // Check if user is pressing the configuration button for more than 5 seconds
     if (isWifiConnected()) {
       if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
           //sendWifiSignalStrength();
           getDataFromSensor(); // Get data from sensor(s) and Publish the message
-          blinkWorkMode();
+          blinkWorkMode(LED_WORK_STATUS);
       }else {
         if (checkMQTTconnection()) { // Try to connect/reconnect
             getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
@@ -116,7 +129,7 @@ void loop(void){
         Serial.println("Wifi handler is taking place");
       if (isClientConectedToMQTTServer())
         disconnectFromMQTTBroker();
-      blinkWifiDisconnected();
+      blinkWifiDisconnected(LED_WORK_STATUS);
     }
   }
 } 

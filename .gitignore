@@ -1,4 +1,7 @@
 
+.pioenvs
+.piolibdeps
+
 .DS_Store
 .idea/
 .idea/*

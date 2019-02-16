@@ -4,6 +4,29 @@ NalkinsCloud-ESP8266
 This is an Arduino project, written in C++, to handle ESP8266 chip  
 The Project will allow send/receive info from/to sensors, forward it to a MQTT broker, and subscribe to topics
 
+Setting up project on CLion and PlatformIO
+------------------------------------------
+
+As [documented](https://docs.platformio.org/en/latest/ide/clion.html), Python2.7 is requiered,  
+Below instructions are for MacOS:
+
+Install PlatformIO:  
+`pip2.7 install -U platformio`
+
+Install Shell Commands:
+```bash
+# create system-wide symlinks
+ln -s ~/.platformio/penv/bin/platformio /usr/local/bin/platformio
+ln -s ~/.platformio/penv/bin/pio /usr/local/bin/pio
+ln -s ~/.platformio/penv/bin/piodebuggdb /usr/local/bin/piodebuggdb
+```
+
+Init new project using the [esp8266-12 board](https://docs.platformio.org/en/latest/boards/espressif8266/esp12e.html):
+
+```bash
+platformio init --ide clion --board esp12e
+```
+
 Getting started
 ---------------
 What will you do:

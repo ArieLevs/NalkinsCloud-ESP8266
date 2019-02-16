@@ -1,13 +1,17 @@
 
+#include <Arduino.h>
+
 // Set delay for the AP (configuraion) mode LED blink
 unsigned long previousConfigurationMode = 0;
 const long ConfigurationModeInterval = 500;
-int ledState = LOW;
+uint8_t ledState = LOW;
 
 /**
  * Perform led blink to indicate device is on configuration mode
+ *
+ * @param uint8_t GPIO number of LED pin
  */
-void blinkConfigurationMode() {
+void blinkConfigurationMode(uint8_t ledIoNum) {
   unsigned long currentMillis = millis();
   if(currentMillis - previousConfigurationMode >= ConfigurationModeInterval) { // Blink LED when on configuration mode
     previousConfigurationMode = currentMillis;
@@ -15,7 +19,7 @@ void blinkConfigurationMode() {
       ledState = HIGH;  // Note that this switches the LED *off*
     else
       ledState = LOW;   // Note that this switches the LED *on*
-    digitalWrite(LED_WORK_STATUS, ledState);
+    digitalWrite(ledIoNum, ledState);
   }
 }
 
@@ -25,8 +29,10 @@ const long workModeInterval = 2500;
 
 /**
  * Perform led blink to indicate device is at normal work mode
+ *
+ * @param uint8_t GPIO number of LED pin
  */
-void blinkWorkMode() {
+void blinkWorkMode(uint8_t ledIoNum) {
   unsigned long currentMillis = millis();
   if(currentMillis - previousWorkMode >= workModeInterval) { // Blink LED when on work mode
     previousWorkMode = currentMillis;
@@ -34,7 +40,7 @@ void blinkWorkMode() {
       ledState = HIGH;  // Note that this switches the LED *off*
     else
       ledState = LOW;   // Note that this switches the LED *on*
-    digitalWrite(LED_WORK_STATUS, ledState);
+    digitalWrite(ledIoNum, ledState);
   }
 }
 
@@ -45,19 +51,21 @@ const long wifiErrorInterval = 2000;
 
 /**
  * Perform led blink to indicate device lost wifi connection
+ *
+ * @param uint8_t GPIO number of LED pin
  */
-void blinkWifiDisconnected() {
+void blinkWifiDisconnected(uint8_t ledIoNum) {
   unsigned long currentMillis = millis();
-  if(currentMillis - previousWorkMode >= wifiErrorInterval) { // Blink LED when wifi disconnected
+  if(currentMillis - previousWifiError >= wifiErrorInterval) { // Blink LED when wifi disconnected
     previousWorkMode = currentMillis;
 
-    digitalWrite(LED_WORK_STATUS, HIGH);
+    digitalWrite(ledIoNum, HIGH);
     delay(50);
-    digitalWrite(LED_WORK_STATUS, LOW);
+    digitalWrite(ledIoNum, LOW);
     delay(50);
-    digitalWrite(LED_WORK_STATUS, HIGH);
+    digitalWrite(ledIoNum, HIGH);
     delay(50);
-    digitalWrite(LED_WORK_STATUS, LOW);
+    digitalWrite(ledIoNum, LOW);
   }
 }
 
