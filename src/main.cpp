@@ -9,11 +9,9 @@
 #include "led_blinks.h"
 #include "http_server_handler.h"
 
-#include "configs.h" //Configuration file
 #include "sensors.h" // Load sensors global variables // THIS SHOULD BE CHANGED ON DEVICE CHANGE
 
-
-bool isConfigurationMode;
+strConfigs configs;
 
 void setup(void) {
   delay(500);
@@ -23,7 +21,7 @@ void setup(void) {
   }
 
   initConfigs();
-  setupSensorsGPIOs(); // Setup device GPIOs
+  initSensor(); // Setup device GPIOs
     
   initEEPROM();
   //clearEEPROM();  // Unmark to remove all data from EEPROM
@@ -65,14 +63,13 @@ void setup(void) {
     Serial.print("General topic is: ");
     Serial.println(generalTopic.c_str());
   }
-    
-  mqttClient = PubSubClient((char*)configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure); //Setup the MQTT client
-  delay(10);
 
-  isConfigurationMode = getConfigurationStatusFlag(); // Get current device work mode (Normal or configuraion)
+  initMqttClient();
+
+  setConfigurationMode(getConfigurationStatusFlag()); // Get current device work mode (Normal or configuraion)
   setConfigurationStatusFlag(0); // Set the configuration mode flag back to false (Set to normal work mode)
 
-  if(!isConfigurationMode) { // If The device in NOT on configuration mode
+  if(!getConfigurationMode()) { // If The device in NOT on configuration mode
     setNormalOperetionMode(); // Set wifi to WIFI_STA
     connectToWifi();
     if(isWifiConnected()) {
@@ -95,7 +92,7 @@ void setup(void) {
             Serial.println("Wifi failed connecting to: ");
             Serial.print(configs.wifiSsid.c_str());
         }
-    isConfigurationMode = true; // If one of the 3 checks failed, start on configuration mode 
+    setConfigurationMode(true); // If one of the 3 checks failed, start on configuration mode
   }
   if (DEBUG)
     Serial.println("Starting configuration mode");
@@ -108,7 +105,7 @@ void setup(void) {
 
 void loop(void){
   delay(50);
-  if (isConfigurationMode) { // If device on configuration mode then handle http server
+  if (getConfigurationMode()) { // If device on configuration mode then handle http server
     blinkConfigurationMode(LED_WORK_STATUS);
     server.handleClient();
   }

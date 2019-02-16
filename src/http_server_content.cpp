@@ -4,6 +4,14 @@
 #include "mqtt_client.h"
 #include "functions.h"
 #include "http_server_handler.h"
+#include "sensors.h"
+
+ESP8266WebServer server;
+WiFiClientSecure wifiClientSecure;
+
+String deviceType; // The devices type definition
+String deviceId; // The devices unique id
+String chipType; // The devices chip type
 
 // ########### ADMIN PAGE START ###########
 //const char PAGE_AdminMainPage[] PROGMEM = R"=====(

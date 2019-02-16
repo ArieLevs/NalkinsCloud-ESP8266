@@ -9,6 +9,7 @@
 
 extern PubSubClient mqttClient;
 
+void initMqttClient();
 void callback(const char* topic, byte* payload, unsigned int length);
 bool connectToMQTTBroker();
 bool checkMQTTSSL();

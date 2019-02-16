@@ -6,9 +6,12 @@
 #include "sensors.h"
 #include "wifi_handler.h"
 
- /*
- * Handles MQQT messaging
- */
+PubSubClient mqttClient;
+
+void initMqttClient() {
+  mqttClient = PubSubClient((char*)configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure); //Setup the MQTT client
+  delay(10);
+}
 
 /**
  * Subscribe client to topic

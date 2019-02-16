@@ -6,6 +6,8 @@
 #include "functions.h"
 #include "mqtt_client.h"
 
+DHT dht(DHTPIN, DHTTYPE, 11); // 11 works fine for ESP8266
+
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
 const long publishInterval = 120000; // interval at which to send message (milliseconds)
@@ -69,8 +71,8 @@ void sendDataToSensor(const char* topic, byte* payload) {
 
   // Brake the topic string into parts
   // Each array cell contains part of the topic
-  while(topicArray[i]!=NULL) {
-    topicArray[++i] = strtok(NULL,"/");
+  while(topicArray[i] != nullptr) {
+    topicArray[++i] = strtok(nullptr,"/");
   }
   
   // If received message is 'update_now' then
@@ -110,7 +112,11 @@ void getSensorsInformation() {
 /**
  * Initialize all sensonrs present in the system
  */
-void setupSensorsGPIOs() {
+void initSensor() {
+  deviceType = "dht"; // The devices type definition
+  deviceId = "test_dht_deviceid"; // The devices unique id
+  chipType = "ESP8266"; // The devices chip type
+
   dht.begin(); // initialize temperature sensor
   
   pinMode(LED_WORK_STATUS, OUTPUT);

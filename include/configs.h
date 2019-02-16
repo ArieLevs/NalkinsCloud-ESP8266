@@ -53,9 +53,13 @@ struct strConfigs {
     String mqttServer;
     uint16_t mqttPort;
     String mqttFingerprint;
-} configs;
+};
+
+extern strConfigs configs;
 
 void initConfigs();
+void setConfigurationMode(bool value);
+bool getConfigurationMode();
 
 #endif /* CONFIGS_H_ */
 

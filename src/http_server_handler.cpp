@@ -2,8 +2,12 @@
 // Created by Arie Lev on 15/02/2019.
 //
 
-
 #include "http_server_handler.h"
+#include "configs.h"
+#include "eeprom_memory.h"
+#include "http_server_content.h"
+#include "wifi_handler.h"
+#include "sensors.h"
 
 
 void handleGeneralSaved() {
@@ -153,18 +157,18 @@ void handleConfigSaved() {
         for ( uint8_t i = 0; i < server.args(); i++ ) { // For each value from network configs page, run on each one and save to 'configs' struct
             if (server.argName(i) == "ssid") configs.wifiSsid = server.arg(i).c_str();
             if (server.argName(i) == "password") configs.wifiPassword = server.arg(i).c_str();
-            if (server.argName(i) == "ip_0") if (checkRange(server.arg(i)))   configs.IP[0] =  server.arg(i).toInt();
-            if (server.argName(i) == "ip_1") if (checkRange(server.arg(i)))   configs.IP[1] =  server.arg(i).toInt();
-            if (server.argName(i) == "ip_2") if (checkRange(server.arg(i)))   configs.IP[2] =  server.arg(i).toInt();
-            if (server.argName(i) == "ip_3") if (checkRange(server.arg(i)))   configs.IP[3] =  server.arg(i).toInt();
-            if (server.argName(i) == "nm_0") if (checkRange(server.arg(i)))   configs.Netmask[0] =  server.arg(i).toInt();
-            if (server.argName(i) == "nm_1") if (checkRange(server.arg(i)))   configs.Netmask[1] =  server.arg(i).toInt();
-            if (server.argName(i) == "nm_2") if (checkRange(server.arg(i)))   configs.Netmask[2] =  server.arg(i).toInt();
-            if (server.argName(i) == "nm_3") if (checkRange(server.arg(i)))   configs.Netmask[3] =  server.arg(i).toInt();
-            if (server.argName(i) == "gw_0") if (checkRange(server.arg(i)))   configs.Gateway[0] =  server.arg(i).toInt();
-            if (server.argName(i) == "gw_1") if (checkRange(server.arg(i)))   configs.Gateway[1] =  server.arg(i).toInt();
-            if (server.argName(i) == "gw_2") if (checkRange(server.arg(i)))   configs.Gateway[2] =  server.arg(i).toInt();
-            if (server.argName(i) == "gw_3") if (checkRange(server.arg(i)))   configs.Gateway[3] =  server.arg(i).toInt();
+            if (server.argName(i) == "ip_0") if (checkRange(server.arg(i)))   configs.IP[0] = (uint8_t)(server.arg(i).toInt());
+            if (server.argName(i) == "ip_1") if (checkRange(server.arg(i)))   configs.IP[1] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "ip_2") if (checkRange(server.arg(i)))   configs.IP[2] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "ip_3") if (checkRange(server.arg(i)))   configs.IP[3] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "nm_0") if (checkRange(server.arg(i)))   configs.Netmask[0] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "nm_1") if (checkRange(server.arg(i)))   configs.Netmask[1] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "nm_2") if (checkRange(server.arg(i)))   configs.Netmask[2] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "nm_3") if (checkRange(server.arg(i)))   configs.Netmask[3] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "gw_0") if (checkRange(server.arg(i)))   configs.Gateway[0] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "gw_1") if (checkRange(server.arg(i)))   configs.Gateway[1] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "gw_2") if (checkRange(server.arg(i)))   configs.Gateway[2] = (uint8_t)server.arg(i).toInt();
+            if (server.argName(i) == "gw_3") if (checkRange(server.arg(i)))   configs.Gateway[3] = (uint8_t)server.arg(i).toInt();
 
             if (server.argName(i) == "dhcp") {
                 if (server.arg(i))
@@ -191,6 +195,8 @@ void startHTTPServer() {
 
     IPAddress mdnsIP = WiFi.localIP();
 
+    MDNSResponder mdns;
+
     //Start mDNS service with the relevant IP
     if (mdns.begin(DNSName.c_str(), mdnsIP)) {
         if (DEBUG) {
@@ -202,15 +208,12 @@ void startHTTPServer() {
         }
     }
     else
-    if (DEBUG) {
-        Serial.println("MDNS failed to start");
-    }
+        if (DEBUG)
+            Serial.println("MDNS failed to start");
+
     handleGeneralSaved();
-
     handleAutoConfig();
-
     handleReturnId();
-
     handleAdminPage();
 
     server.on( "/generalSettings", []() {  //General configs, will show device ID, version etc and allow storing new device password
@@ -218,8 +221,6 @@ void startHTTPServer() {
             Serial.println("Return generalSettings.html page");
         server.send_P( 200, "text/html", PAGE_GeneralSettings );
     });
-
-
 
     server.on( "/configNetwork", []() {
         if (DEBUG)
