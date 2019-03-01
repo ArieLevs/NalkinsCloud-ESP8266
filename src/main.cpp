@@ -103,11 +103,11 @@ void setup(void) {
 }
 
 
-void loop(void){
+void loop(void) {
   delay(50);
   if (getConfigurationMode()) { // If device on configuration mode then handle http server
     blinkConfigurationMode(LED_WORK_STATUS);
-    server.handleClient();
+    handleClient();
   }
   else { // If device is on normal work mode
     checkConfigurationButton(CONFIGURATIONMODEBUTTON); // Check if user is pressing the configuration button for more than 5 seconds
@@ -122,6 +122,7 @@ void loop(void){
         }
       }
     } else {
+      // TODO add doOfflineWork here
       if (DEBUG)
         Serial.println("Wifi handler is taking place");
       if (isClientConectedToMQTTServer())

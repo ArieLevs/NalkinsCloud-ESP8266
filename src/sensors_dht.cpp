@@ -43,7 +43,7 @@ void collectAndPublishData() {
     //message = "DHT Error";
     return;
   } else {
-    dtostrf(humidity, 4, 2, message); // Ardoinu based function converting float to string
+    dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
   }
   publishMessageToMQTTBroker((char*)topic.c_str(), message, false); //Send the data
 }
@@ -51,7 +51,7 @@ void collectAndPublishData() {
 
 /**
  * Execute incoming message to sensor,
- * The message will be converted to real actions that should apply on sensors
+ * The message will be converted to real actions thatvoid handleClient() should apply on sensors
  * This function is being forwarded from the callback() function
  * 
  * @param topic incoming message topic
@@ -98,8 +98,6 @@ void getDataFromSensor() {
 }
 
 
-
-
 /**
  * Subscribe to all relevant sensors connected
  */
@@ -124,5 +122,3 @@ void initSensor() {
 
   pinMode(CONFIGURATIONMODEBUTTON, INPUT); // Setup Configuration mode button
 }
-
-

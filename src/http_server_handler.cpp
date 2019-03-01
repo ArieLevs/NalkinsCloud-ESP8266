@@ -10,6 +10,11 @@
 #include "sensors.h"
 
 
+void handleClient() {
+    server.handleClient();
+}
+
+
 void handleGeneralSaved() {
     server.on( "/generalSaved", []() { // Small redirect page that indicates that general configs been saved
         if (DEBUG)
