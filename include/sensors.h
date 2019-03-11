@@ -9,16 +9,16 @@
 #define SENSORS_H_
 
 // Define sensors GPIOs
-#define CONFIGURATIONMODEBUTTON 13 // Pin which define the button that sets the device to configuration mode
-#define LED_WORK_STATUS 12
+#define CONFIGURATION_MODE_BUTTON 13 // Pin which define the button that sets the device to configuration mode
+#define LED_WORK_STATUS 2
 
 //Set DHT type and input pin
-#define DHTTYPE DHT22
-#define DHTPIN 4 // Set IO pin 4 for DHT sensor
+#define DHT_TYPE DHT22
+#define DHT_PIN 4 //Set IO pin 4 for DHT sensor
 
-#include "DHT.h" // Load DHT library
+#include "DHT.h"
 
-extern DHT dht; // 11 works fine for ESP8266
+extern DHT dht;
 
 extern String deviceType; // The devices type definition
 extern String deviceId; // The devices unique id

@@ -6,7 +6,7 @@
 #include "functions.h"
 #include "mqtt_client.h"
 
-DHT dht(DHTPIN, DHTTYPE, 11); // 11 works fine for ESP8266
+DHT dht(DHT_PIN, DHT_TYPE, 11); // 11 works fine for ESP8266
 
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
@@ -120,5 +120,5 @@ void initSensor() {
 	pinMode(LED_WORK_STATUS, OUTPUT);
 	digitalWrite(LED_WORK_STATUS, LOW);
 
-	pinMode(CONFIGURATIONMODEBUTTON, INPUT); // Setup Configuration mode button
+	pinMode(CONFIGURATION_MODE_BUTTON, INPUT); // Setup Configuration mode button
 }

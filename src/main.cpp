@@ -105,7 +105,7 @@ void loop(void) {
 		handleClient();
 	} else { // If device is on normal work mode
 		checkConfigurationButton(
-				CONFIGURATIONMODEBUTTON); // Check if user is pressing the configuration button for more than 5 seconds
+				CONFIGURATION_MODE_BUTTON); // Check if user is pressing the configuration button for more than 5 seconds
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
 				//sendWifiSignalStrength();
