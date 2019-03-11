@@ -28,7 +28,7 @@
 #define ACCESS_POINT_PASSWORD "nalkinscloud"
 
 extern bool isConfigurationMode; // Runtime var to store work mode status
- 
+
 // MQTT server configurations
 extern String fingerprint; // "AA 33 9C 6F 71 BE D3 C9 47 5B D2 92 AA 13 AC D6 DC 21 DB D2"; Example SHA1 - 60 Bytes
 
@@ -42,23 +42,25 @@ extern String DNSName;
 extern String versionNum;
 
 struct strConfigs {
-    String wifiSsid;
-    String wifiPassword;
-    bool dhcp;
-    uint8_t  IP[4];
-    uint8_t  Netmask[4];
-    uint8_t  Gateway[4];
-    String devicePassword;
-    String clientUsername;
-    String mqttServer;
-    uint16_t mqttPort;
-    String mqttFingerprint;
+	String wifiSsid;
+	String wifiPassword;
+	bool dhcp;
+	uint8_t IP[4];
+	uint8_t Netmask[4];
+	uint8_t Gateway[4];
+	String devicePassword;
+	String clientUsername;
+	String mqttServer;
+	uint16_t mqttPort;
+	String mqttFingerprint;
 };
 
 extern strConfigs configs;
 
 void initConfigs();
+
 void setConfigurationMode(bool value);
+
 bool getConfigurationMode();
 
 #endif /* CONFIGS_H_ */

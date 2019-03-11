@@ -24,7 +24,8 @@ extern String deviceType; // The devices type definition
 extern String deviceId; // The devices unique id
 extern String chipType; // The devices chip type
 
-void sendDataToSensor(const char* topic, byte* payload);
+void sendDataToSensor(const char *topic, byte *payload);
+
 void collectAndPublishData();
 
 // Declare and set default values
@@ -40,7 +41,9 @@ extern bool wasBarrelDisposalExecuted;
 extern bool isErrorOccured;
 
 void initSensor();
+
 void getDataFromSensor();
+
 void getSensorsInformation();
 
 #endif /* SENSORS_H_ */

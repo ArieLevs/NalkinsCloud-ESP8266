@@ -11,7 +11,8 @@ PubSubClient mqttClient;
 void initMqttClient() {
 	wifiClientSecure = WiFiClientSecure();
 	wifiClientSecure.setInsecure();
-	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure); //Setup the MQTT client
+	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback,
+							  wifiClientSecure); //Setup the MQTT client
 	delay(10);
 }
 

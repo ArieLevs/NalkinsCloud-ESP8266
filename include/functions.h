@@ -10,8 +10,11 @@
 #include "eeprom_memory.h"
 
 void checkConfigurationButton(uint8_t pinNum);
-uint8_t* getMacAddress();
-String macToStr(uint8_t* mac);
+
+uint8_t *getMacAddress();
+
+String macToStr(uint8_t *mac);
+
 bool areCharArraysEqual(const char *s1, const char *s2);
 
 #endif //NALKINSCLOUD_ESP8266_FUNCTIONS_H

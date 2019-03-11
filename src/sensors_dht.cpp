@@ -14,38 +14,38 @@ const long publishInterval = 120000; // interval at which to send message (milli
 
 
 void collectAndPublishData() {
-  String topic;
-  char message[sizeof(float)];
-  float temprature_c, humidity;
+	String topic;
+	char message[sizeof(float)];
+	float temprature_c, humidity;
 
-  // Get temprature value from DHT sensor
-  temprature_c = dht.readTemperature();
-  topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relavant sensor
+	// Get temprature value from DHT sensor
+	temprature_c = dht.readTemperature();
+	topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relavant sensor
 
-  //If there was an error reading data from sensor then
-  if (isnan(temprature_c)) {
-    if (DEBUG)
-      Serial.println("Failed to read temprature from DHT sensor!");
-    //message = "DHT Error";
-    return;
-  } else {
-    dtostrf(temprature_c, 4, 2, message); // Arduino based function converting float to string
-  }
-  publishMessageToMQTTBroker((char*)topic.c_str(), message, false); //Send the data
+	//If there was an error reading data from sensor then
+	if (isnan(temprature_c)) {
+		if (DEBUG)
+			Serial.println("Failed to read temprature from DHT sensor!");
+		//message = "DHT Error";
+		return;
+	} else {
+		dtostrf(temprature_c, 4, 2, message); // Arduino based function converting float to string
+	}
+	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 
-  humidity = dht.readHumidity();
-  topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relavant sensor
-  // Send humidity value
-  // If there was an error reading data from sensor then
-  if (isnan(humidity)) {
-    if (DEBUG)
-      Serial.println("Failed to read humidity from DHT sensor!");
-    //message = "DHT Error";
-    return;
-  } else {
-    dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
-  }
-  publishMessageToMQTTBroker((char*)topic.c_str(), message, false); //Send the data
+	humidity = dht.readHumidity();
+	topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relavant sensor
+	// Send humidity value
+	// If there was an error reading data from sensor then
+	if (isnan(humidity)) {
+		if (DEBUG)
+			Serial.println("Failed to read humidity from DHT sensor!");
+		//message = "DHT Error";
+		return;
+	} else {
+		dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
+	}
+	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 }
 
 
@@ -57,29 +57,29 @@ void collectAndPublishData() {
  * @param topic incoming message topic
  * @param payload incoming message payload
  */
-void sendDataToSensor(const char* topic, byte* payload) {
-  if(DEBUG)
-    Serial.println("Running 'sendDataToSensor' function");
-    
-  // topic should be of type: "deviceid/devicetype/data"
-  // Char array that will store the topic in parts 
-  char* topicArray[4];
+void sendDataToSensor(const char *topic, byte *payload) {
+	if (DEBUG)
+		Serial.println("Running 'sendDataToSensor' function");
 
-  int i=0;
-  // Get the first section from topic
-  topicArray[i] = strtok((char*)topic,"/");
+	// topic should be of type: "deviceid/devicetype/data"
+	// Char array that will store the topic in parts
+	char *topicArray[4];
 
-  // Brake the topic string into parts
-  // Each array cell contains part of the topic
-  while(topicArray[i] != nullptr) {
-    topicArray[++i] = strtok(nullptr,"/");
-  }
-  
-  // If received message is 'update_now' then
-  if(areCharArraysEqual(topicArray[2], "update_now")) {
-    collectAndPublishData();
-  }
-    
+	int i = 0;
+	// Get the first section from topic
+	topicArray[i] = strtok((char *) topic, "/");
+
+	// Brake the topic string into parts
+	// Each array cell contains part of the topic
+	while (topicArray[i] != nullptr) {
+		topicArray[++i] = strtok(nullptr, "/");
+	}
+
+	// If received message is 'update_now' then
+	if (areCharArraysEqual(topicArray[2], "update_now")) {
+		collectAndPublishData();
+	}
+
 }
 
 
@@ -88,13 +88,13 @@ void sendDataToSensor(const char* topic, byte* payload) {
  * Accourdung to each sensor logic, decide if message publish is needed
  */
 void getDataFromSensor() {
-  //For each sensor, check its last publish time 
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousPublish >= publishInterval) {
-    previousPublish = currentMillis;
+	//For each sensor, check its last publish time
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousPublish >= publishInterval) {
+		previousPublish = currentMillis;
 
-    collectAndPublishData();
-  }
+		collectAndPublishData();
+	}
 }
 
 
@@ -102,8 +102,8 @@ void getDataFromSensor() {
  * Subscribe to all relevant sensors connected
  */
 void getSensorsInformation() {
-  String topic = generalTopic + "update_now";
-  subscribeToMQTTBroker((char*)topic.c_str());
+	String topic = generalTopic + "update_now";
+	subscribeToMQTTBroker((char *) topic.c_str());
 }
 
 
@@ -111,14 +111,14 @@ void getSensorsInformation() {
  * Initialize all sensonrs present in the system
  */
 void initSensor() {
-  deviceType = "dht"; // The devices type definition
-  deviceId = "test_dht_deviceid"; // The devices unique id
-  chipType = "ESP8266"; // The devices chip type
+	deviceType = "dht"; // The devices type definition
+	deviceId = "test_dht_deviceid"; // The devices unique id
+	chipType = "ESP8266"; // The devices chip type
 
-  dht.begin(); // initialize temperature sensor
-  
-  pinMode(LED_WORK_STATUS, OUTPUT);
-  digitalWrite(LED_WORK_STATUS, LOW);
+	dht.begin(); // initialize temperature sensor
 
-  pinMode(CONFIGURATIONMODEBUTTON, INPUT); // Setup Configuration mode button
+	pinMode(LED_WORK_STATUS, OUTPUT);
+	digitalWrite(LED_WORK_STATUS, LOW);
+
+	pinMode(CONFIGURATIONMODEBUTTON, INPUT); // Setup Configuration mode button
 }

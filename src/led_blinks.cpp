@@ -12,15 +12,16 @@ uint8_t ledState = LOW;
  * @param uint8_t GPIO number of LED pin
  */
 void blinkConfigurationMode(uint8_t ledIoNum) {
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousConfigurationMode >= ConfigurationModeInterval) { // Blink LED when on configuration mode
-    previousConfigurationMode = currentMillis;
-    if (ledState == LOW)
-      ledState = HIGH;  // Note that this switches the LED *off*
-    else
-      ledState = LOW;   // Note that this switches the LED *on*
-    digitalWrite(ledIoNum, ledState);
-  }
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousConfigurationMode >=
+		ConfigurationModeInterval) { // Blink LED when on configuration mode
+		previousConfigurationMode = currentMillis;
+		if (ledState == LOW)
+			ledState = HIGH;  // Note that this switches the LED *off*
+		else
+			ledState = LOW;   // Note that this switches the LED *on*
+		digitalWrite(ledIoNum, ledState);
+	}
 }
 
 // Set delay for the normal mode LED blink
@@ -33,15 +34,15 @@ const long workModeInterval = 2500;
  * @param uint8_t GPIO number of LED pin
  */
 void blinkWorkMode(uint8_t ledIoNum) {
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousWorkMode >= workModeInterval) { // Blink LED when on work mode
-    previousWorkMode = currentMillis;
-    if (ledState == LOW)
-      ledState = HIGH;  // Note that this switches the LED *off*
-    else
-      ledState = LOW;   // Note that this switches the LED *on*
-    digitalWrite(ledIoNum, ledState);
-  }
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousWorkMode >= workModeInterval) { // Blink LED when on work mode
+		previousWorkMode = currentMillis;
+		if (ledState == LOW)
+			ledState = HIGH;  // Note that this switches the LED *off*
+		else
+			ledState = LOW;   // Note that this switches the LED *on*
+		digitalWrite(ledIoNum, ledState);
+	}
 }
 
 
@@ -55,17 +56,16 @@ const long wifiErrorInterval = 2000;
  * @param uint8_t GPIO number of LED pin
  */
 void blinkWifiDisconnected(uint8_t ledIoNum) {
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousWifiError >= wifiErrorInterval) { // Blink LED when wifi disconnected
-    previousWorkMode = currentMillis;
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousWifiError >= wifiErrorInterval) { // Blink LED when wifi disconnected
+		previousWorkMode = currentMillis;
 
-    digitalWrite(ledIoNum, HIGH);
-    delay(50);
-    digitalWrite(ledIoNum, LOW);
-    delay(50);
-    digitalWrite(ledIoNum, HIGH);
-    delay(50);
-    digitalWrite(ledIoNum, LOW);
-  }
+		digitalWrite(ledIoNum, HIGH);
+		delay(50);
+		digitalWrite(ledIoNum, LOW);
+		delay(50);
+		digitalWrite(ledIoNum, HIGH);
+		delay(50);
+		digitalWrite(ledIoNum, LOW);
+	}
 }
-
