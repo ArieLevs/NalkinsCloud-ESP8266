@@ -37,12 +37,10 @@ void setup(void) {
   /**
    * TEMPORATY
    */
-  configs.mqttServer = "mosquitto.nalkins.cloud";
+  configs.mqttServer = "10.0.1.1";
   configs.mqttPort = 8883;
-  configs.devicePassword = "";
-  configs.wifiSsid = "";
-  configs.wifiPassword = "";
-
+  configs.clientUsername = "test_dht_device";
+  configs.devicePassword = "12345678";
   if (DEBUG) {
     Serial.println("Server configs: ");
     Serial.print("Username: ");
@@ -70,7 +68,7 @@ void setup(void) {
   setConfigurationStatusFlag(0); // Set the configuration mode flag back to false (Set to normal work mode)
 
   if(!getConfigurationMode()) { // If The device in NOT on configuration mode
-    setNormalOperetionMode(); // Set wifi to WIFI_STA
+    setNormalOperationMode(); // Set wifi to WIFI_STA
     connectToWifi();
     if(isWifiConnected()) {
       if(connectToMQTTBroker()) {
@@ -117,7 +115,7 @@ void loop(void) {
           getDataFromSensor(); // Get data from sensor(s) and Publish the message
           blinkWorkMode(LED_WORK_STATUS);
       }else {
-        if (checkMQTTconnection()) { // Try to connect/reconnect
+        if (checkMQTTConnection()) { // Try to connect/reconnect
             getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
         }
       }
@@ -125,7 +123,7 @@ void loop(void) {
       // TODO add doOfflineWork here
       if (DEBUG)
         Serial.println("Wifi handler is taking place");
-      if (isClientConectedToMQTTServer())
+      if (isClientConnectedToMQTTServer())
         disconnectFromMQTTBroker();
       blinkWifiDisconnected(LED_WORK_STATUS);
     }

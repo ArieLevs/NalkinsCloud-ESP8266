@@ -7,6 +7,7 @@
 #include "eeprom_memory.h"
 #include "http_server_content.h"
 #include "wifi_handler.h"
+#include "mqtt_client.h"
 #include "sensors.h"
 
 

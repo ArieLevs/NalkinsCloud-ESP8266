@@ -7,11 +7,9 @@
 
 #include <ESP8266WiFi.h>
 
-extern WiFiClientSecure wifiClientSecure;
-
 bool isWifiConnected();
 bool connectToWifi();
-void setNormalOperetionMode();
+void setNormalOperationMode();
 void initializeWifiHandlers();
 void setConfigurationMode();
 void reconnectToWifi();
