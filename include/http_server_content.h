@@ -6,7 +6,7 @@
 #define NALKINSCLOUD_ESP8266_HTTP_SERVER_CONTENT_H
 
 
-const char PAGE_AdminMainPage[] = R"=====(
+const char PAGE_AdminMainPage[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <strong>Administration</strong>
 <hr>
@@ -79,7 +79,7 @@ window.onload = function ()
   {
     load("microajax.js","js", function()
     {
-        setValues("/admin/generalvalues");
+        setValues("/admin/general_values");
     });
   });
 }
@@ -88,7 +88,7 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 </script>
 )=====";
 
-const char PAGE_GeneralSettingsSaved[] = R"=====(
+const char PAGE_GeneralSettingsSaved[] PROGMEM = R"=====(
   <script>
     window.onload = function ()
     {
@@ -100,7 +100,7 @@ const char PAGE_GeneralSettingsSaved[] = R"=====(
 // ########### GENERAL CONFIG SAVE PAGE END ###########
 
 // ########### INFORMATION PAGE START ###########
-const char PAGE_Information[] = R"=====(
+const char PAGE_Information[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" href="style.css" type="text/css" />
@@ -115,7 +115,7 @@ const char PAGE_Information[] = R"=====(
 <tr><td align="right">Mac :</td><td><span id="x_mac"></span></td></tr>
 
 <tr><td colspan="2"></span></td></tr>
-<strong>WiFi Connection State:</strong><div id="wificonnectionstate">N/A</div>
+<strong>WiFi Connection State:</strong><div id="wifi_connection_state">N/A</div>
 <tr><td colspan="2" align="center"><a href="javascript:GetNetworkState()" class="btn btn--m btn--blue">Refresh</a></td></tr>
 <tr><td colspan="2" align="center"><a href="javascript:ReconnectToWifi()" class="btn btn--m btn--blue">Reconnect</a></td></tr>
 </table>
@@ -144,13 +144,13 @@ const char PAGE_Information[] = R"=====(
 
 <script>
 function GetNetworkState() {
-  setValues("/admin/infovalues"); // Call webServerGetNetworkInfo() function
+  setValues("/admin/info_values"); // Call webServerGetNetworkInfo() function
 }
 function ReconnectToWifi() {
-  setValues("/admin/wifireconnect"); // Call reconnect_to_wifi() function
+  setValues("/admin/wifi_reconnect"); // Call reconnect_to_wifi() function
 }
 function GetMQTTState() {
-  setValues("/admin/mqttinfovalues");
+  setValues("/admin/mqtt_info_values");
 }
 
 window.onload = function () {
@@ -167,7 +167,7 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 </script>
 )=====";
 
-const char PAGE_NetworkConfiguration[] = R"=====(
+const char PAGE_NetworkConfiguration[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <a href="/"  class="btn btn--s">Back</a>&nbsp;&nbsp;<strong>Network Configuration</strong>
@@ -186,7 +186,7 @@ Connect to Router with these settings:<br>
 </table>
 </form>
 <hr>
-<strong>Connection State:</strong><div id="wificonnectionstate">N/A</div>
+<strong>Connection State:</strong><div id="wifi_connection_state">N/A</div>
 <hr>
 <strong>Networks:</strong><br>
 <table border="0"  cellspacing="3" style="width:310px" >
@@ -197,7 +197,7 @@ Connect to Router with these settings:<br>
 <script>
 
 function GetState() { // Function will return avilable networks
-  setValues("/admin/getnetworks"); // This page will start the webServerGetAvailableNetworks() function
+  setValues("/admin/get_networks"); // This page will start the webServerGetAvailableNetworks() function
 }
 function selssid(value) {
   document.getElementById("ssid").value = value;
@@ -217,7 +217,7 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 </script>
 )=====";
 
-const char PAGE_NetworkConfigurationSaved[] = R"=====(
+const char PAGE_NetworkConfigurationSaved[] PROGMEM = R"=====(
   <script>
     window.onload = function ()
     {
@@ -229,7 +229,7 @@ const char PAGE_NetworkConfigurationSaved[] = R"=====(
 // ########### Network CONF SAVE PAGE END ###########
 
 // ########### RESTART PAGE START ###########
-const char PAGE_Restart[] = R"=====(
+const char PAGE_Restart[] PROGMEM = R"=====(
   <script>
     window.onload = function ()
     {
@@ -242,7 +242,7 @@ const char PAGE_Restart[] = R"=====(
 // ########### RESTART PAGE END ###########
 
 // ########### STYLE PAGE START ###########
-const char PAGE_Style_css[] = R"=====(
+const char PAGE_Style_css[] PROGMEM = R"=====(
 body { color: #000000; font-family: avenir, helvetica, arial, sans-serif;  letter-spacing: 0.15em;}
 hr {    background-color: #eee;    border: 0 none;   color: #eee;    height: 1px; }
 .btn, .btn:link, .btn:visited {
@@ -311,7 +311,7 @@ color: #fff;
 // ########### STYLE PAGE END ###########
 
 // ########### microajax_js PAGE START ###########
-const char PAGE_microajax_js[] = R"=====(
+const char PAGE_microajax_js[] PROGMEM = R"=====(
 function microAjax(B,A){this.bindFunction=function(E,D){return function(){return E.apply(D,[D])}};this.stateChange=function(D){if(this.request.readyState==4){this.callbackFunction(this.request.responseText)}};this.getRequest=function(){if(window.ActiveXObject){return new ActiveXObject("Microsoft.XMLHTTP")}else{if(window.XMLHttpRequest){return new XMLHttpRequest()}}return false};this.postBody=(arguments[2]||"");this.callbackFunction=A;this.url=B;this.request=this.getRequest();if(this.request){var C=this.request;C.onreadystatechange=this.bindFunction(this.stateChange,this);if(this.postBody!==""){C.open("POST",B,true);C.setRequestHeader("X-Requested-With","XMLHttpRequest");C.setRequestHeader("Content-type","application/x-www-form-urlencoded");C.setRequestHeader("Connection","close")}else{C.open("GET",B,true)}C.send(this.postBody)}};
 
 function setValues(url)
@@ -336,16 +336,6 @@ function setValues(url)
   });
 }
 )=====";
-
-//const char PAGE_AdminMainPage[] = "";
-//const char PAGE_GeneralSettings[];
-//const char PAGE_GeneralSettingsSaved[];
-//const char PAGE_Information[];
-//const char PAGE_NetworkConfiguration[];
-//const char PAGE_NetworkConfigurationSaved[];
-//const char PAGE_Restart[];
-//const char PAGE_Style_css[];
-//const char PAGE_microajax_js[];
 
 void webServerGetAvailableNetworks();
 

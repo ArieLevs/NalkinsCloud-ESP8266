@@ -27,23 +27,7 @@ void writeStringToEEPROM(int startAddress, String value) {
 }
 
 
-/*
-*
-* EEPROM Section
-* Bits 0-31 belong to SSID info
-* Bits 32-63 belong to wifi password info
-* Bits 64-95 belong to MQTT server name
-* Bits 96-127 belong to Customer user name
-* Bits 128-159 belong to Device password
-* Bit 494 hold data if the device is on configuration mode
-* Bits 495-499 belong to MQTT server port
-* Bits 256-384 belong to MQTT server port // 128bit
-* Bit 500 sets service mode flag (value 0 = public MQTT server, value 1 = local server)
-* Bit 501 sets DHCP status
-* Bit 502 sets version update mode (value 0 = not on update mode, value 1 = device on version update mode)
-* Bits 503-510 sets Device password
-*
-*/
+
 
 
 /**
@@ -58,10 +42,10 @@ void writeNetworkConfigs() {
 		Serial.println(configs.wifiPassword.c_str());
 	}
 
-	writeStringToEEPROM(SSIDSTARTSTARTADDR, configs.wifiSsid);
-	writeStringToEEPROM(WIFIPASSSTARTADDR, configs.wifiPassword);
+	writeStringToEEPROM(SSID_START_ADDR, configs.wifiSsid);
+	writeStringToEEPROM(WIFI_PASS_START_ADDR, configs.wifiPassword);
 
-	EEPROM.write(DHCPFLAG, 1);
+	EEPROM.write(DHCP_FLAG_ADDR, 1);
 
 	EEPROM.write(400, configs.IP[0]);
 	EEPROM.write(401, configs.IP[1]);
@@ -89,7 +73,7 @@ void readNetworkConfigs() {
 	configs.wifiSsid = readStringFromEEPROM(0);
 	configs.wifiPassword = readStringFromEEPROM(32);
 
-	configs.dhcp = EEPROM.read(DHCPFLAG);
+	configs.dhcp = EEPROM.read(DHCP_FLAG_ADDR);
 
 	configs.IP[0] = EEPROM.read(400);
 	configs.IP[1] = EEPROM.read(401);
@@ -202,8 +186,8 @@ void clearEEPROM() {
  * 
  * @param configurationStatus integer number (should be 0 or 1) to be writen to EEPROM
  */
-void setConfigurationStatusFlag(const uint8_t configurationStatus) {
-	EEPROM.write(CONFIGURATIONMODEADDR, configurationStatus); // Write given value to CONFIGURATIONMODEADDR (494)
+void setConfigurationStatusFlag(uint8_t configurationStatus) {
+	EEPROM.write(CONFIGURATION_MODE_ADDR, configurationStatus); // Write given value to CONFIGURATION_MODE_ADDR (494)
 	if (DEBUG) {
 		Serial.print("ConfigurationStatus set to: ");
 		Serial.println(configurationStatus);
@@ -219,7 +203,7 @@ void setConfigurationStatusFlag(const uint8_t configurationStatus) {
  *                  false - value in different from 1
  */
 bool getConfigurationStatusFlag() {
-	int value = EEPROM.read(CONFIGURATIONMODEADDR);
+	int value = EEPROM.read(CONFIGURATION_MODE_ADDR);
 	if (DEBUG) {
 		Serial.print("configuration status is: ");
 		Serial.println(value);
@@ -237,11 +221,11 @@ bool getConfigurationStatusFlag() {
  */
 void setServiceMode(int serviceMode) {
 	if (serviceMode == 0) {
-		EEPROM.write(SERVICEMODEFLAG, 0);
+		EEPROM.write(SERVICE_MODE_FLAG_ADDR, 0);
 		if (DEBUG)
 			Serial.println("Service mode set to standalone (0)");
 	} else {
-		EEPROM.write(SERVICEMODEFLAG, 1);
+		EEPROM.write(SERVICE_MODE_FLAG_ADDR, 1);
 		if (DEBUG)
 			Serial.println("Service mode set to local-server (1)");
 	}
@@ -256,7 +240,7 @@ void setServiceMode(int serviceMode) {
  *                  false - value in different from 1
  */
 int getServiceMode() {
-	int answer = EEPROM.read(SERVICEMODEFLAG);
+	int answer = EEPROM.read(SERVICE_MODE_FLAG_ADDR);
 	if (DEBUG) {
 		Serial.print("Service mode is: ");
 		Serial.println(answer);

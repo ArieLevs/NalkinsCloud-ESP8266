@@ -29,16 +29,16 @@ void sendDataToSensor(const char *topic, byte *payload);
 void collectAndPublishData();
 
 // Declare and set default values
-extern int mainHeaterStartTemprature;
-extern int waterCoolerStartTemprature;
-extern int airCoolerStartTemprature;
-extern int toBarrelSisposalStartTemprature;
+extern int mainHeaterStartTemperature;
+extern int waterCoolerStartTemperature;
+extern int airCoolerStartTemperature;
+extern int toBarrelDisposalStartTemperature;
 
 extern bool wasGarbageDisposalExecuted;
 extern bool garbageDisposalMadeTimeSnapshot;
 extern bool barrelDisposalMadeTimeSnapshot;
 extern bool wasBarrelDisposalExecuted;
-extern bool isErrorOccured;
+extern bool isErrorOccurred;
 
 void initSensor();
 

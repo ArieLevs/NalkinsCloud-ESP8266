@@ -17,9 +17,9 @@ String chipType; // The devices chip type
 // Called when 'PAGE_GeneralSettings' is built (/)
 // Will send all relevant info to be displayed on page
 void webServerGetGeneralConfigurationValues() {
-	//configs.clientUsername = readStringFromEEPROM(USERNAMESTARTADDR);
+	//configs.clientUsername = readStringFromEEPROM(USER_NAME_START_ADDR);
 	configs.devicePassword = readStringFromEEPROM(
-			DEVICEPASSSTARTADDR); // Read device password from EEPROM and store to 'configs' struct
+			DEVICE_PASS_START_ADDR); // Read device password from EEPROM and store to 'configs' struct
 	String values;
 	values += "version|" + versionNum + "|input\n";
 	values += "model|" + chipType + "|input\n";
@@ -54,7 +54,7 @@ void webServerGetNetworkInfo() {
 	values += "x_netmask|" + (String) WiFi.subnetMask()[0] + "." + (String) WiFi.subnetMask()[1] + "." +
 			  (String) WiFi.subnetMask()[2] + "." + (String) WiFi.subnetMask()[3] + "|div\n";
 	values += "x_mac|" + macToStr(getMacAddress()) + "|div\n";
-	values += "wificonnectionstate|" + state + "|div\n";
+	values += "wifi_connection_state|" + state + "|div\n";
 	server.send(200, "text/plain", values.c_str());
 	if (DEBUG)
 		Serial.println(__FUNCTION__);
@@ -137,7 +137,7 @@ void webServerGetAvailableNetworks() {
 	}
 
 	String values;
-	values += "wificonnectionstate|" + (String) state + "|div\n";
+	values += "wifi_connection_state|" + (String) state + "|div\n";
 	values += "networks|" + Networks + "|div\n";
 	server.send(200, "text/plain", values.c_str());
 	if (DEBUG)

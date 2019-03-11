@@ -16,6 +16,7 @@ void initMqttClient() {
 	delay(10);
 }
 
+
 /**
  * Subscribe client to topic
  * 
@@ -29,6 +30,7 @@ void subscribeToMQTTBroker(const char *topic) {
 	}
 	delay(500);
 }
+
 
 /**
  * Publish message to MQTT server
@@ -60,6 +62,7 @@ bool publishMessageToMQTTBroker(const char *topic, char *message, bool isRetaine
 	}
 }
 
+
 /**
  * mqtt callback function, called when new messages arrives
  * 
@@ -81,6 +84,7 @@ void callback(const char *topic, byte *payload, unsigned int length) {
 	delay(10);
 	sendDataToSensor(topic, payload);
 }
+
 
 /**
  * Perform connection to MQTT broker and verification of SSL fingerprint
@@ -112,8 +116,9 @@ bool checkMQTTConnection() {
 	return false;
 }
 
+
 /**
- * Generate topic contaning constat device id and type, with relevent value
+ * Generate topic containing constant device id and type, with relevant value
  *
  * @param data last topic section
  *
@@ -128,6 +133,7 @@ String generateTopic(String data) {
 	result += data;
 	return result;
 }
+
 
 /**
  * Connect to MQTT server
@@ -180,6 +186,7 @@ bool connectToMQTTBroker() {
 	return false;
 }
 
+
 /**
  * Checks for servers digital signature fingerprint
  * 
@@ -189,6 +196,7 @@ bool connectToMQTTBroker() {
 bool checkMQTTSSL() {
 	return wifiClientSecure.verify(fingerprint.c_str(), (char *) configs.mqttServer.c_str());
 }
+
 
 /**
  * Disconnect from MQTT server
@@ -200,6 +208,7 @@ void disconnectFromMQTTBroker() {
 	mqttClient.disconnect();
 }
 
+
 /**
  * Check if client is connected to MQTT server
  * 
@@ -210,9 +219,11 @@ bool isClientConnectedToMQTTServer() {
 	return mqttClient.connected();
 }
 
+
 //Set time to "delay" a wifi signal strength publish message
 unsigned long wifiSignalPreviousPublish = 0;
 const long wifiSignalPublishInterval = 60000; // interval at which to send message (milliseconds)
+
 
 /**
  * Send wifi signal strength to broker

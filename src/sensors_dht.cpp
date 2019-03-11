@@ -16,25 +16,25 @@ const long publishInterval = 120000; // interval at which to send message (milli
 void collectAndPublishData() {
 	String topic;
 	char message[sizeof(float)];
-	float temprature_c, humidity;
+	float temperature_c, humidity;
 
-	// Get temprature value from DHT sensor
-	temprature_c = dht.readTemperature();
-	topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relavant sensor
+	// Get temperature value from DHT sensor
+	temperature_c = dht.readTemperature();
+	topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relevant sensor
 
 	//If there was an error reading data from sensor then
-	if (isnan(temprature_c)) {
+	if (isnan(temperature_c)) {
 		if (DEBUG)
-			Serial.println("Failed to read temprature from DHT sensor!");
+			Serial.println("Failed to read temperature from DHT sensor!");
 		//message = "DHT Error";
 		return;
 	} else {
-		dtostrf(temprature_c, 4, 2, message); // Arduino based function converting float to string
+		dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
 	}
 	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 
 	humidity = dht.readHumidity();
-	topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relavant sensor
+	topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relevant sensor
 	// Send humidity value
 	// If there was an error reading data from sensor then
 	if (isnan(humidity)) {
@@ -51,7 +51,7 @@ void collectAndPublishData() {
 
 /**
  * Execute incoming message to sensor,
- * The message will be converted to real actions thatvoid handleClient() should apply on sensors
+ * The message will be converted to real actions that void handleClient() should apply on sensors
  * This function is being forwarded from the callback() function
  * 
  * @param topic incoming message topic
@@ -61,7 +61,7 @@ void sendDataToSensor(const char *topic, byte *payload) {
 	if (DEBUG)
 		Serial.println("Running 'sendDataToSensor' function");
 
-	// topic should be of type: "deviceid/devicetype/data"
+	// topic should be of type: "device_id/device_type/data"
 	// Char array that will store the topic in parts
 	char *topicArray[4];
 
@@ -79,13 +79,12 @@ void sendDataToSensor(const char *topic, byte *payload) {
 	if (areCharArraysEqual(topicArray[2], "update_now")) {
 		collectAndPublishData();
 	}
-
 }
 
 
 /**
  * Collect data from sensors
- * Accourdung to each sensor logic, decide if message publish is needed
+ * According to each sensor logic, decide if message publish is needed
  */
 void getDataFromSensor() {
 	//For each sensor, check its last publish time
@@ -108,11 +107,11 @@ void getSensorsInformation() {
 
 
 /**
- * Initialize all sensonrs present in the system
+ * Initialize all sensors present in the system
  */
 void initSensor() {
 	deviceType = "dht"; // The devices type definition
-	deviceId = "test_dht_deviceid"; // The devices unique id
+	deviceId = "test_dht_device_id"; // The devices unique id
 	chipType = "ESP8266"; // The devices chip type
 
 	dht.begin(); // initialize temperature sensor

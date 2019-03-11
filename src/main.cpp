@@ -28,14 +28,14 @@ void setup(void) {
 
 	//Get current network and other info configurations from flash memory
 	readNetworkConfigs(); // This will also return the wifi SSID and password
-	configs.clientUsername = readStringFromEEPROM(USERNAMESTARTADDR);
-	configs.devicePassword = readStringFromEEPROM(DEVICEPASSSTARTADDR);
-	configs.mqttServer = readStringFromEEPROM(MQTTSERVERSTARTADDR);
-	configs.mqttPort = (uint16_t) atoi(readStringFromEEPROM(MQTTPORTSTARTADDR).c_str());
-	//configs.mqttFingerprint = readFingerprintFromEEPROM(MQTTFINGERPRINTSTARTADDR);
+	configs.clientUsername = readStringFromEEPROM(USER_NAME_START_ADDR);
+	configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_START_ADDR);
+	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_START_ADDR);
+	configs.mqttPort = (uint16_t) atoi(readStringFromEEPROM(MQTT_PORT_START_ADDR).c_str());
+	//configs.mqttFingerprint = readFingerprintFromEEPROM(MQTT_FINGERPRINT_START_ADDR);
 
 	/**
-	 * TEMPORATY
+	 * TEMP
 	 */
 	configs.mqttServer = "10.0.1.1";
 	configs.mqttPort = 8883;
@@ -78,7 +78,7 @@ void setup(void) {
 						Serial.println("Connection tests passed successfully");
 					//WiFi.setAutoReconnect(false);
 					initializeWifiHandlers();
-					return; // All tests successfull start main loop when NOT on configuration mode (isConfigurationMode = FALSE)
+					return; // All tests successful start main loop when NOT on configuration mode (isConfigurationMode = FALSE)
 				} else if (DEBUG)
 					Serial.println("MQTT SSL Verification failed");
 			} else if (DEBUG)
@@ -126,4 +126,3 @@ void loop(void) {
 		}
 	}
 } 
-

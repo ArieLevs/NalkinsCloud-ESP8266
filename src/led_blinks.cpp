@@ -1,7 +1,7 @@
 
 #include <Arduino.h>
 
-// Set delay for the AP (configuraion) mode LED blink
+// Set delay for the AP (configuration) mode LED blink
 unsigned long previousConfigurationMode = 0;
 const long ConfigurationModeInterval = 500;
 uint8_t ledState = LOW;

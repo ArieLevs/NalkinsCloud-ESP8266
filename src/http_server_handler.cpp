@@ -20,12 +20,12 @@ void handleGeneralSaved() {
 	server.on("/generalSaved", []() { // Small redirect page that indicates that general configs been saved
 		if (DEBUG)
 			Serial.println("Running generalSaved.html page");
-		if ((server.arg("devicepassword").length() == 8) &&
+		if ((server.arg("device_password").length() == 8) &&
 			(server.arg("username").length() <= 16)) { // If Password is in the length of 8 chars
-			writeStringToEEPROM(USERNAMESTARTADDR,
+			writeStringToEEPROM(USER_NAME_START_ADDR,
 								server.arg("username").c_str()); // Save customers user name to EEPROM flash memory
-			writeStringToEEPROM(DEVICEPASSSTARTADDR,
-								server.arg("devicepassword").c_str()); //Save the password to EEPROM flash memory
+			writeStringToEEPROM(DEVICE_PASS_START_ADDR,
+								server.arg("device_password").c_str()); //Save the password to EEPROM flash memory
 			if (DEBUG)
 				Serial.println("User name and Device Password written to flash memory");
 			server.send_P(200, "text/html", PAGE_GeneralSettingsSaved); //And display small success redirect page
@@ -54,9 +54,9 @@ void handleReturnId() {
 	/*
    * Once http://DEVICEIP/returnid is accessed it will return devices ID and TYPE
    */
-	server.on("/returnid", HTTP_POST, []() {
+	server.on("/return_id", HTTP_POST, []() {
 		if (DEBUG)
-			Serial.println("JSON returnid initiated");
+			Serial.println("JSON return_id initiated");
 		StaticJsonBuffer<256> newBuffer;
 		// Get the request JSON body
 		JsonObject &jsonmsg = newBuffer.parseObject(server.arg("plain"));
@@ -78,7 +78,7 @@ void handleReturnId() {
 						("{\"status\":\"success\", \"device_id\":\"" + deviceId + "\", \"device_type\":\"" +
 						 deviceType + "\"}").c_str());
 			if (DEBUG)
-				Serial.println("/returnid returned success");
+				Serial.println("/return_id returned success");
 		}
 		delay(500);
 	});
@@ -139,21 +139,21 @@ void handleAutoConfig() {
 				if (DEBUG)
 					Serial.println("Wifi connection successful, Writing wifi configs to EEPROM");
 				// If successful store wifi credentials
-				writeStringToEEPROM(SSIDSTARTSTARTADDR, configs.wifiSsid);
-				writeStringToEEPROM(WIFIPASSSTARTADDR, configs.wifiPassword);
+				writeStringToEEPROM(SSID_START_ADDR, configs.wifiSsid);
+				writeStringToEEPROM(WIFI_PASS_START_ADDR, configs.wifiPassword);
 
 				if (DEBUG)
 					Serial.println("Writing MQTT config ro EEPROM");
 				// Store MQTT server info and credentials
-				writeStringToEEPROM(MQTTSERVERSTARTADDR, configs.mqttServer);
-				writeStringToEEPROM(MQTTPORTSTARTADDR, String(configs.mqttPort).c_str());
-				// writeStringToEEPROM(USERNAMESTARTADDR, configs.clientUsername); //Save customers user name to flash memory
-				writeStringToEEPROM(DEVICEPASSSTARTADDR, configs.devicePassword); //Save the password to flash memory
+				writeStringToEEPROM(MQTT_SERVER_START_ADDR, configs.mqttServer);
+				writeStringToEEPROM(MQTT_PORT_START_ADDR, String(configs.mqttPort).c_str());
+				// writeStringToEEPROM(USER_NAME_START_ADDR, configs.clientUsername); //Save customers user name to flash memory
+				writeStringToEEPROM(DEVICE_PASS_START_ADDR, configs.devicePassword); //Save the password to flash memory
 
 				server.send(200, "text/plain",
 							"{\"status\":\"success\",\"message\":\"successfully connected to wifi\"}");
 				if (DEBUG)
-					Serial.println("Autoconfig connection was successful, Restaring device");
+					Serial.println("Autoconfig connection was successful, Restarting device");
 				ESP.restart();
 			}
 			server.send(200, "text/plain", "{\"status\":\"failed\",\"message\":\"could not connect to wifi\"}");
@@ -300,11 +300,11 @@ void startHTTPServer() {
 	 * When client is to execute a function that should be run from the HTTP server (browser)
 	 * The page is being redirected to the below URLs, each url will run the relevant function
 	 */
-	server.on("/admin/getnetworks", webServerGetAvailableNetworks);
-	server.on("/admin/infovalues", webServerGetNetworkInfo);
-	server.on("/admin/wifireconnect", webServerReconnectToWifi);
-	server.on("/admin/mqttinfovalues", webServerGetMqttInfo);
-	server.on("/admin/generalvalues", webServerGetGeneralConfigurationValues);
+	server.on("/admin/get_networks", webServerGetAvailableNetworks);
+	server.on("/admin/info_values", webServerGetNetworkInfo);
+	server.on("/admin/wifi_reconnect", webServerReconnectToWifi);
+	server.on("/admin/mqtt_info_values", webServerGetMqttInfo);
+	server.on("/admin/general_values", webServerGetGeneralConfigurationValues);
 
 	server.onNotFound([]() {
 		if (DEBUG)

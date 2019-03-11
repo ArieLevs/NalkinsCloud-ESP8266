@@ -16,8 +16,8 @@ boolean isMotionDetected() {
   pirValue = digitalRead(motionPin); // Read PIR status
   
   if( pirValue == HIGH) { // Motion detected
-    // If lastPIRState was LOW, do below so statment will run only on PIR output change,
-    // If lastPIRState was already High, then just skipp below if statment.
+    // If lastPIRState was LOW, do below so statement will run only on PIR output change,
+    // If lastPIRState was already High, then just skipp below if statement.
     if (lastPIRState == LOW) {
       Serial.println("Motion detected.");
       lastPIRState = HIGH;
@@ -27,7 +27,7 @@ boolean isMotionDetected() {
   } else { // NO Motion detected
     // If lastPIRState was HIGH, this means there where motion last call,
     // And it is now stopped
-    // If there was not motion on this call, and no motion last call just skipp if statment
+    // If there was not motion on this call, and no motion last call just skipp if statement
     if (lastPIRState == HIGH){
       Serial.println("Motion ended.");
       lastPIRState = LOW;
@@ -35,4 +35,3 @@ boolean isMotionDetected() {
     return false; // Return FALSE for NO motion detected
   }
 }
-

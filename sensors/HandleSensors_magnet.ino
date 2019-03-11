@@ -1,5 +1,4 @@
 
-
 /**
  * Execute incoming message to sensor,
  * The message will be converted to real actions that should apply on sensors
@@ -12,7 +11,7 @@ void sendDataToSensor(const char* topic, byte* payload) {
 	if(DEBUG)
 		Serial.println("Running 'sendDataToSensor' function");
 	
-	// topic should be of type: "deviceid/devicetype/data"
+	// topic should be of type: "device_id/device_type/data"
 	// Char array that will store the topic in parts 
 	char *topicArray[4];
 	
@@ -31,8 +30,8 @@ void sendDataToSensor(const char* topic, byte* payload) {
 		// Do update
 	}
 
-	// If topic data equals RECEIVESTATUS then
-	if(areEqual(topicArray[2], RECEIVESTATUS)) {
+	// If topic data equals RECEIVE_STATUS then
+	if(areEqual(topicArray[2], RECEIVE_STATUS)) {
 	// If received 1 then system armed
 		if((char)payload[0] == '1') {
 			isTriggered = true;
@@ -43,7 +42,7 @@ void sendDataToSensor(const char* topic, byte* payload) {
 		}
 	}
 
-	if(areEqual(topicArray[2], RELEASEALARM)) {
+	if(areEqual(topicArray[2], RELEASE_ALARM)) {
 	isAlarmOn = false;
 	isAlarmSent = false;
 	isTriggered = false;
@@ -62,11 +61,11 @@ void getDataFromSensor() {
   if(currentMillis - previousMagnetCheck >= magnetCheckInterval) {
     previousMagnetCheck = currentMillis;
 
-    String topic = generalTopic + SENDSTATUS; // Setup the publish topic
+    String topic = generalTopic + SEND_STATUS; // Setup the publish topic
 
-    // MAGNETINPUT = 1 -> Locked
-    // MAGNETINPUT = 0 -> Opened
-    int magnetStatus = digitalRead(MAGNETINPUT); // Get sensor state
+    // MAGNET_INPUT = 1 -> Locked
+    // MAGNET_INPUT = 0 -> Opened
+    int magnetStatus = digitalRead(MAGNET_INPUT); // Get sensor state
     
     if(firstStatePublish) { // This will happen only once at application life cycle
       publishMessageToMQTTBroker((char*)topic.c_str(), (char*)String(magnetStatus).c_str(), retained); //Send the data
@@ -94,20 +93,21 @@ void getDataFromSensor() {
 
 
 //Function will handle to subscribe all relevant sensors connected
-//This funcrion is dynamic and will be changed regarding all connected sensor
+//This function is dynamic and will be changed regarding all connected sensor
 void getSensorsInformation() {
-  String topic = generalTopic + RECEIVESTATUS;
+  String topic = generalTopic + RECEIVE_STATUS;
   subscribeToMQTTBroker((char*)topic.c_str());
-  topic = generalTopic + RELEASEALARM;
+  topic = generalTopic + RELEASE_ALARM;
   subscribeToMQTTBroker((char*)topic.c_str());
 }
+
 
 void setupSensorsGPIOs() {
   // Preparing GPIOs
   pinMode(LED_IO, OUTPUT);
   digitalWrite(LED_IO, LOW);
   
-  pinMode(MAGNETINPUT, INPUT);
+  pinMode(MAGNET_INPUT, INPUT);
 }
 
 
@@ -125,7 +125,7 @@ void doAlarmBuzzer() {
       buzzerIsOn = false;
     }  
     else {
-      tone(BUZZER, BUZZERFREQUENCY); // Do sound
+      tone(BUZZER, BUZZER_FREQUENCY); // Do sound
       buzzerIsOn = true;
     }
   }

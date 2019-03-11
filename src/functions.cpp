@@ -58,7 +58,7 @@ int confButtonCountDown = 5; // 5 seconds
 
 /**
  * Check if user is pressing the configuration button for more then 5 seconds
- * In case (CONFIGURATIONMODEBUTTON) pressed more then 5 seconds, restart the device
+ * In case (CONFIGURATION_MODE_BUTTON) pressed more then 5 seconds, restart the device
  *
  * @param pinNum num of GPIO of configuration button
  */

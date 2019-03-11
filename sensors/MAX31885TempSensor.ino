@@ -29,4 +29,3 @@ double getTempFromMAX31855() {
      return celsiusTemp;
    }
 }
-

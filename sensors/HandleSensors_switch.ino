@@ -19,7 +19,7 @@ void sendDataToSensor(const char* topic, byte* payload) {
   if(DEBUG)
     Serial.println("Running 'sendDataToSensor' function");
     
-  // topic should be of type: "deviceid/devicetype/data"
+  // topic should be of type: "device_id/device_type/data"
   // Char array that will store the topic in parts 
   char* topicArray[4];
 
@@ -46,7 +46,7 @@ void sendDataToSensor(const char* topic, byte* payload) {
 
 /**
  * Collect data from sensors
- * Accourdung to each sensor logic, decide if message publish is needed
+ * According to each sensor logic, decide if message publish is needed
  */
 void getDataFromSensor() {
 	int currentSwitchState = digitalRead(SWITCH_IN);
@@ -92,7 +92,7 @@ void getSensorsInformation() {
 
 
 /**
- * Initialize all sensonrs present in the system
+ * Initialize all sensors present in the system
  */
 void setupSensorsGPIOs() {
   pinMode(SWITCH_OUT, OUTPUT);
@@ -100,6 +100,5 @@ void setupSensorsGPIOs() {
   
   digitalWrite(LED_WORK_STATUS, LOW);
 
-  pinMode(CONFIGURATIONMODEBUTTON, INPUT); // Setup Configuration mode button
+  pinMode(CONFIGURATION_MODE_BUTTON, INPUT); // Setup Configuration mode button
 }
-
