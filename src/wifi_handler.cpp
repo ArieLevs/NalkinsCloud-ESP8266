@@ -37,24 +37,18 @@ bool connectToWifi() {
 		return true;
 	if (DEBUG)
 		Serial.println(
-				"Starting WiFi connection to: " + configs.wifiSsid + "\nUsing MAC address: " + WiFi.macAddress());
+				"Starting WiFi connection to: " + configs.wifiSsid + "\nSelf MAC address: " + WiFi.macAddress());
 
 	if (!configs.dhcp) // If DHCP was NOT selected during configuration, set STATIC IP configs
 		WiFi.config(IPAddress(configs.IP[0], configs.IP[1], configs.IP[2], configs.IP[3]),
 					IPAddress(configs.Gateway[0], configs.Gateway[1], configs.Gateway[2], configs.Gateway[3]),
 					IPAddress(configs.Netmask[0], configs.Netmask[1], configs.Netmask[2], configs.Netmask[3]));
 
+	// Set self host name
 	WiFi.hostname("ESP8266");
-
 	delay(50);
+
 	WiFi.begin(configs.wifiSsid.c_str(), configs.wifiPassword.c_str());
-
-	// Start wifi disconnection handlers, This should be true only if not on configuration mode
-	//if(!isConfigurationMode) {
-	//  wifiConnectedHandler = WiFi.onStationModeGotIP(wifiGotIP);
-	//  wifiDisconnectedHandler = WiFi.onStationModeDisconnected(wifiDisconnected);
-	//}
-
 	int counter = 0;
 	while (counter < 30) { // 30 iterations * 500ms = 15 seconds timeout
 		//If the connection was successful

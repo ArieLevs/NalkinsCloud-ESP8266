@@ -27,10 +27,12 @@
 #define ACCESS_POINT_SSID "ESP8266"
 #define ACCESS_POINT_PASSWORD "nalkinscloud"
 
+
+extern bool isSslEncrypted;
 extern bool isConfigurationMode; // Runtime var to store work mode status
 
 // MQTT server configurations
-extern String fingerprint; // "AA 33 9C 6F 71 BE D3 C9 47 5B D2 92 AA 13 AC D6 DC 21 DB D2"; Example SHA1 - 60 Bytes
+const char fingerprint[] PROGMEM = "24 4A 4D E8 D3 5B EE 8A CC C6 26 3C 22 6F 54 2C 59 02 1F F4"; // SHA1 - 60 Bytes
 
 extern String generalTopic;
 extern int QOS;

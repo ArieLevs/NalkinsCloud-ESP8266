@@ -58,9 +58,6 @@ void collectAndPublishData() {
  * @param payload incoming message payload
  */
 void sendDataToSensor(const char *topic, byte *payload) {
-	if (DEBUG)
-		Serial.println("Running 'sendDataToSensor' function");
-
 	// topic should be of type: "device_id/device_type/data"
 	// Char array that will store the topic in parts
 	char *topicArray[4];

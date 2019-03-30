@@ -9,7 +9,7 @@
 bool isConfigurationMode; // Runtime var to store work mode status
 
 // MQTT server configurations
-String fingerprint; // "AA 33 9C 6F 71 BE D3 C9 47 5B D2 92 AA 13 AC D6 DC 21 DB D2"; Example SHA1 - 60 Bytes
+bool isSslEncrypted;
 
 String generalTopic;
 int QOS;
@@ -21,9 +21,9 @@ String DNSName;
 String versionNum;
 
 void initConfigs() {
+	bool isSslEncrypted = true;
 	isConfigurationMode = true;
 	// MQTT server configurations
-	fingerprint = "";
 	QOS = 1;
 	retained = true; //Set retained messages to true
 	notRetained = false; //Set retained messages to false

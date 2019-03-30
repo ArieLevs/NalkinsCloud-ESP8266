@@ -15,6 +15,8 @@ void initMqttClient();
 
 void callback(const char *topic, byte *payload, unsigned int length);
 
+String printMqttConnectionStatus(int return_code);
+
 bool connectToMQTTBroker();
 
 bool checkMQTTSSL();

@@ -10,9 +10,13 @@ PubSubClient mqttClient;
 
 void initMqttClient() {
 	wifiClientSecure = WiFiClientSecure();
-	wifiClientSecure.setInsecure();
-	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback,
-							  wifiClientSecure); //Setup the MQTT client
+	if (isSslEncrypted) {
+		wifiClientSecure.setFingerprint(fingerprint);
+		Serial.print("################");
+	}
+	else
+		wifiClientSecure.setInsecure();
+	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure);
 	delay(10);
 }
 
@@ -124,7 +128,7 @@ bool checkMQTTConnection() {
  *
  * @return String full topic (as of DEVICE_ID/DEVICE_TYPE/DATA)
  */
-String generateTopic(String data) {
+String generateTopic(const char* data) {
 	String result = "";
 	result += deviceId.c_str();
 	result += "/";
@@ -136,11 +140,13 @@ String generateTopic(String data) {
 
 
 /**
- * Connect to MQTT server
- * 
- * @return boolean  true - connected successfully 
- *                  false - connection failed
- * Available return status
+ * Translate connection return code to String description
+ *
+ * @param return_code, the return code from mosquitto broker
+ * @return String, with description of the return code
+ * 		as described here: https://pubsubclient.knolleary.net/api.html#state
+ *
+ * Available return status will be translated at function 'printMqttConnectionStatus'
  * -4 : MQTT_CONNECTION_TIMEOUT - the server didn't respond within the keepalive time
  * -3 : MQTT_CONNECTION_LOST - the network connection was broken
  * -2 : MQTT_CONNECT_FAILED - the network connection failed
@@ -151,6 +157,40 @@ String generateTopic(String data) {
  * 3 : MQTT_CONNECT_UNAVAILABLE - the server was unable to accept the connection
  * 4 : MQTT_CONNECT_BAD_CREDENTIALS - the username/password were rejected
  * 5 : MQTT_CONNECT_UNAUTHORIZED - the client was not authorized to connect
+ */
+String printMqttConnectionStatus(int return_code) {
+
+	switch(return_code) {
+		case -4 :
+			return "MQTT_CONNECTION_TIMEOUT (-4) - the server didn't respond within the keepalive time";
+		case -3 :
+			return "MQTT_CONNECTION_LOST (-3) - the network connection was broken";
+		case -2 :
+			return "MQTT_CONNECT_FAILED (-2) - the network connection failed";
+		case -1 :
+			return "MQTT_DISCONNECTED (-1) - the client is disconnected cleanly";
+		case 0 :
+			return "MQTT_CONNECTED (0) - the client is connected";
+		case 1 :
+			return "MQTT_CONNECT_BAD_PROTOCOL (1) - the server doesn't support the requested version of MQTT";
+		case 2 :
+			return "MQTT_CONNECT_BAD_CLIENT_ID (2) - the server rejected the client identifier";
+		case 3 :
+			return "MQTT_CONNECT_UNAVAILABLE (3) - the server was unable to accept the connection";
+		case 4 :
+			return "MQTT_CONNECT_BAD_CREDENTIALS (4) - the username/password were rejected";
+		case 5 :
+			return "MQTT_CONNECT_UNAUTHORIZED (5) - the client was not authorized to connect";
+		default:
+			return "ERROR - return code was not found";
+	}
+}
+
+/**
+ * Connect to MQTT server
+ * 
+ * @return boolean  true - connected successfully 
+ *                  false - connection failed
  */
 bool connectToMQTTBroker() {
 	// This is a LWT message, that will be sent if device loss connection to the server
@@ -172,16 +212,16 @@ bool connectToMQTTBroker() {
 	if (mqttClient.connect(deviceId.c_str(), deviceId.c_str(), configs.devicePassword.c_str(),
 						   generateTopic("status").c_str(), QOS, retained, willMessage)) {
 		if (DEBUG) {
-			Serial.print("Connection successful, status = ");
-			Serial.println(mqttClient.state());
+			Serial.print("Connection successful, status: ");
+			Serial.println(printMqttConnectionStatus(mqttClient.state()));
 		}
 		// If connected, send message with status 'online'
 		publishMessageToMQTTBroker(generateTopic("status").c_str(), "online", retained);
 		return true;
 	}
 	if (DEBUG) {
-		Serial.print("Connection failed, status = ");
-		Serial.println(mqttClient.state());
+		Serial.print("Connection failed, status: ");
+		Serial.println(printMqttConnectionStatus(mqttClient.state()));
 	}
 	return false;
 }
@@ -194,7 +234,7 @@ bool connectToMQTTBroker() {
  *                  false - MQTT server fingerprint invalid
  */
 bool checkMQTTSSL() {
-	return wifiClientSecure.verify(fingerprint.c_str(), (char *) configs.mqttServer.c_str());
+	return wifiClientSecure.verify(fingerprint, (char *) configs.mqttServer.c_str());
 }
 
 

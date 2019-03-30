@@ -52,7 +52,7 @@ void handleAdminPage() {
 
 void handleReturnId() {
 	/*
-   * Once http://DEVICEIP/returnid is accessed it will return devices ID and TYPE
+   * Once http://DEVICEIP/return_id is accessed it will return devices ID and TYPE
    */
 	server.on("/return_id", HTTP_POST, []() {
 		if (DEBUG)
@@ -72,7 +72,7 @@ void handleReturnId() {
 			server.send(200, "text/plain",
 						"{\"status\":\"failed\",\"message\":\"message contains error(s), check json syntax\"}");
 			if (DEBUG)
-				Serial.println("/returnid returned error");
+				Serial.println("/return_id returned error");
 		} else {
 			server.send(200, "text/plain",
 						("{\"status\":\"success\", \"device_id\":\"" + deviceId + "\", \"device_type\":\"" +
@@ -132,7 +132,7 @@ void handleAutoConfig() {
 				//Serial.println(configs.clientUsername);
 				Serial.print("devicePassword set: ");
 				Serial.println(configs.devicePassword.c_str());
-				Serial.println("Runnig connection check from autoconfig");
+				Serial.println("Running connection check from autoconfig");
 			}
 			// Connect to received wifi SSID and password
 			if (connectToWifi()) {

@@ -86,7 +86,7 @@ void webServerGetMqttInfo() {
 	values += "mqttdeviceid|" + deviceId + "|div\n";
 	values += "mqttpassword|" + configs.devicePassword + "|div\n";
 	values += "mqttconnectionstate|" + mqttState + "|div\n";
-	values += "fingerprint|" + fingerprint + "|div\n";
+	values += "fingerprint|" + (String)fingerprint + "|div\n";
 	values += "sslconnection|" + sslState + "|div\n";
 	server.send(200, "text/plain", values.c_str());
 	if (DEBUG)
