@@ -9,16 +9,10 @@
 #define SENSORS_H_
 
 // Define sensors GPIOs
-#define CONFIGURATION_MODE_BUTTON 13 // Pin which define the button that sets the device to configuration mode
-#define LED_WORK_STATUS 2
-
-//Set DHT type and input pin
-#define DHT_TYPE DHT22
-#define DHT_PIN 4 //Set IO pin 4 for DHT sensor
-
-#include "DHT.h"
-
-extern DHT dht;
+#define CONFIGURATION_MODE_BUTTON 13 // GPIO13 -> D7, Pin which define the button that sets the device to configuration mode
+#define BUZZER 14					 // GPIO14 -> D5
+#define BUZZER_FREQUENCY 1000
+#define LED_WORK_STATUS 2			 // GPIO2 -> D4
 
 extern String deviceType; // The devices type definition
 extern String deviceId; // The devices unique id
@@ -27,18 +21,6 @@ extern String chipType; // The devices chip type
 void sendDataToSensor(const char *topic, byte *payload);
 
 void collectAndPublishData();
-
-// Declare and set default values
-extern int mainHeaterStartTemperature;
-extern int waterCoolerStartTemperature;
-extern int airCoolerStartTemperature;
-extern int toBarrelDisposalStartTemperature;
-
-extern bool wasGarbageDisposalExecuted;
-extern bool garbageDisposalMadeTimeSnapshot;
-extern bool barrelDisposalMadeTimeSnapshot;
-extern bool wasBarrelDisposalExecuted;
-extern bool isErrorOccurred;
 
 void initSensor();
 
