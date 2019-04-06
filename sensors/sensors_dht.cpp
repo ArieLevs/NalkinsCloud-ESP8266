@@ -6,6 +6,12 @@
 #include "functions.h"
 #include "mqtt_client.h"
 
+#include "DHT.h"
+
+//Set DHT type and input pin
+#define DHT_TYPE 	DHT22	// Set type of used DHT type
+#define DHT_PIN 	4 		// GPIO4 -> D2
+
 DHT dht(DHT_PIN, DHT_TYPE, 11); // 11 works fine for ESP8266
 
 //Set time to "delay" a publish message
