@@ -12,48 +12,41 @@
 #define DHT_TYPE 	DHT22	// Set type of used DHT type
 #define DHT_PIN 	4 		// GPIO4 -> D2
 
+float temperature_c, humidity;
+
 DHT dht(DHT_PIN, DHT_TYPE, 11); // 11 works fine for ESP8266
 
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
 const long publishInterval = 120000; // interval at which to send message (milliseconds)
 
-
-void collectAndPublishData() {
+/**
+ * Publish all data to the mqtt broker
+ */
+void publishDataToServer() {
 	String topic;
 	char message[sizeof(float)];
-	float temperature_c, humidity;
-
-	// Get temperature value from DHT sensor
-	temperature_c = dht.readTemperature();
 	topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relevant sensor
 
-	//If there was an error reading data from sensor then
-	if (isnan(temperature_c)) {
+	if (isnan(temperature_c)) { //If there was an error reading data from sensor then
 		if (DEBUG)
 			Serial.println("Failed to read temperature from DHT sensor!");
 		//message = "DHT Error";
 		return;
-	} else {
+	} else
 		dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
-	}
 	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 
-	humidity = dht.readHumidity();
 	topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relevant sensor
-	// Send humidity value
-	// If there was an error reading data from sensor then
-	if (isnan(humidity)) {
+	if (isnan(humidity)) { // If there was an error reading data from sensor then
 		if (DEBUG)
 			Serial.println("Failed to read humidity from DHT sensor!");
 		//message = "DHT Error";
 		return;
-	} else {
+	} else
 		dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
-	}
 	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 }
-
 
 /**
  * Execute incoming message to sensor,
@@ -80,14 +73,12 @@ void sendDataToSensor(const char *topic, byte *payload) {
 
 	// If received message is 'update_now' then
 	if (areCharArraysEqual(topicArray[2], "update_now")) {
-		collectAndPublishData();
+		publishDataToServer();
 	}
 }
 
-
 /**
  * Collect data from sensors
- * According to each sensor logic, decide if message publish is needed
  */
 void getDataFromSensor() {
 	//For each sensor, check its last publish time
@@ -95,7 +86,16 @@ void getDataFromSensor() {
 	if (currentMillis - previousPublish >= publishInterval) {
 		previousPublish = currentMillis;
 
-		collectAndPublishData();
+		// Get temperature value from DHT sensor
+		temperature_c = dht.readTemperature();
+		if (isnan(temperature_c)) //If there was an error reading data from sensor then
+			if (DEBUG)
+				Serial.println("Failed to read temperature from DHT sensor!");
+
+		humidity = dht.readHumidity();
+		if (isnan(humidity)) // If there was an error reading data from sensor then
+			if (DEBUG)
+				Serial.println("Failed to read humidity from DHT sensor!");
 	}
 }
 
