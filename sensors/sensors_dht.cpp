@@ -24,28 +24,33 @@ const long publishInterval = 120000; // interval at which to send message (milli
  * Publish all data to the mqtt broker
  */
 void publishDataToServer() {
-	String topic;
-	char message[sizeof(float)];
-	topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relevant sensor
+	//For each sensor, check its last publish time
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousPublish >= publishInterval) {
+		previousPublish = currentMillis;
+		String topic;
+		char message[sizeof(float)];
+		topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relevant sensor
 
-	if (isnan(temperature_c)) { //If there was an error reading data from sensor then
-		if (DEBUG)
-			Serial.println("Failed to read temperature from DHT sensor!");
-		//message = "DHT Error";
-		return;
-	} else
-		dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
-	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
+		if (isnan(temperature_c)) { //If there was an error reading data from sensor then
+			if (DEBUG)
+				Serial.println("Failed to read temperature from DHT sensor!");
+			//message = "DHT Error";
+			return;
+		} else
+			dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
+		publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 
-	topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relevant sensor
-	if (isnan(humidity)) { // If there was an error reading data from sensor then
-		if (DEBUG)
-			Serial.println("Failed to read humidity from DHT sensor!");
-		//message = "DHT Error";
-		return;
-	} else
-		dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
-	publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
+		topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relevant sensor
+		if (isnan(humidity)) { // If there was an error reading data from sensor then
+			if (DEBUG)
+				Serial.println("Failed to read humidity from DHT sensor!");
+			//message = "DHT Error";
+			return;
+		} else
+			dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
+		publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
+	}
 }
 
 /**
@@ -81,22 +86,16 @@ void sendDataToSensor(const char *topic, byte *payload) {
  * Collect data from sensors
  */
 void getDataFromSensor() {
-	//For each sensor, check its last publish time
-	unsigned long currentMillis = millis();
-	if (currentMillis - previousPublish >= publishInterval) {
-		previousPublish = currentMillis;
+	// Get temperature value from DHT sensor
+	temperature_c = dht.readTemperature();
+	if (isnan(temperature_c)) //If there was an error reading data from sensor then
+		if (DEBUG)
+			Serial.println("Failed to read temperature from DHT sensor!");
 
-		// Get temperature value from DHT sensor
-		temperature_c = dht.readTemperature();
-		if (isnan(temperature_c)) //If there was an error reading data from sensor then
-			if (DEBUG)
-				Serial.println("Failed to read temperature from DHT sensor!");
-
-		humidity = dht.readHumidity();
-		if (isnan(humidity)) // If there was an error reading data from sensor then
-			if (DEBUG)
-				Serial.println("Failed to read humidity from DHT sensor!");
-	}
+	humidity = dht.readHumidity();
+	if (isnan(humidity)) // If there was an error reading data from sensor then
+		if (DEBUG)
+			Serial.println("Failed to read humidity from DHT sensor!");
 }
 
 
