@@ -9,7 +9,6 @@ void initEEPROM() {
 	EEPROM.begin(512); // Initiate flash rom with 512 bytes
 }
 
-
 /**
  * Write to EEPROM a given string, starting from a given EEPROM address
  * The given addresses MUST be consistent with other parts in this code
@@ -25,10 +24,6 @@ void writeStringToEEPROM(int startAddress, String value) {
 		EEPROM.write(startAddress + i, chBuffer[i]);
 	EEPROM.commit();
 }
-
-
-
-
 
 /**
  * Write wifi SSID and password to EEPROM flash memory
@@ -64,7 +59,6 @@ void writeNetworkConfigs() {
 
 	EEPROM.commit();
 }
-
 
 /**
  * Get EEPROM network configs to global struct
@@ -129,7 +123,6 @@ void readNetworkConfigs() {
 	}
 }
 
-
 /**
  * Read string beginning at a given address
  * Max string size in EEPROM is 32
@@ -154,7 +147,6 @@ String readStringFromEEPROM(int beginAddress) {
 	return retString;
 }
 
-
 /**
  * Check that Value is between 0-255
  * 
@@ -167,7 +159,6 @@ bool checkRange(String value) {
 	return (value.toInt() < 0 || value.toInt() > 255);
 }
 
-
 /**
  * Erase the EEPROM flash memory
  */
@@ -178,7 +169,6 @@ void clearEEPROM() {
 	if (DEBUG)
 		Serial.println("Entire flash memory deleted");
 }
-
 
 /**
  * Write to EEPROM the configuration status mode of the device
@@ -195,7 +185,6 @@ void setConfigurationStatusFlag(uint8_t configurationStatus) {
 	EEPROM.commit();
 }
 
-
 /**
  * get from EEPROM the configuration status mode of the device
  * 
@@ -211,8 +200,6 @@ bool getConfigurationStatusFlag() {
 	return (value == 1);
 }
 
-
-// 
 /**
  * Write to EEPROM the chosen service mode of the devise
  * EEPROM service mode address is 500
@@ -232,7 +219,6 @@ void setServiceMode(int serviceMode) {
 	EEPROM.commit();
 }
 
-
 /**
  * get from EEPROM the service status mode of the device
  * 
@@ -248,7 +234,6 @@ int getServiceMode() {
 	return answer;
 }
 
-
 /**
  * Erase Wifi SSID from EEPROM flash memory
  * Bits 0-31 belong to SSID info
@@ -261,12 +246,11 @@ void clearSSIDFromEEPROM() {
 		Serial.println("SSID deleted from flash memory");
 }
 
-
 /**
  * Erase Wifi pass from EEPROM flash memory
  * Bits 32-63 belong to wifi password info
  */
-void clearPasswordFromEEPROM(void) {
+void clearPasswordFromEEPROM() {
 	for (unsigned int i = 0; i < 512; ++i)
 		EEPROM.write(32 + i, 0);
 	EEPROM.commit();

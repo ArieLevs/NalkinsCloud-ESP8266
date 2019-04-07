@@ -8,6 +8,8 @@
 #ifndef SENSORS_H_
 #define SENSORS_H_
 
+#include "buzzer.h"
+
 // Define sensors GPIOs
 #define CONFIGURATION_MODE_BUTTON 13 // GPIO13 -> D7, Pin which define the button that sets the device to configuration mode
 #define BUZZER 14					 // GPIO14 -> D5
@@ -20,12 +22,12 @@ extern String chipType; // The devices chip type
 
 void sendDataToSensor(const char *topic, byte *payload);
 
-void collectAndPublishData();
-
 void initSensor();
 
 void getDataFromSensor();
 
 void getSensorsInformation();
+
+void publishDataToServer();
 
 #endif /* SENSORS_H_ */

@@ -1,5 +1,4 @@
 
-
 #include "functions.h"
 
 /**
@@ -19,7 +18,6 @@ String macToStr(uint8_t *mac) {
 	return result;
 }
 
-
 /**
  * Return devices mac address 
  */
@@ -28,7 +26,6 @@ uint8_t *getMacAddress() {
 	WiFi.macAddress(mac);
 	return mac;
 }
-
 
 /**
  * Compare two strings (char arrays)
@@ -49,12 +46,10 @@ bool areCharArraysEqual(const char *s1, const char *s2) {
 	return true;  // Strings must be the same
 }
 
-
 // Set time to "delay" configuration button press
 unsigned long previousConfButton = 0;
 const long ConfButtonInterval = 1000; // interval at which to send message (milliseconds)
 int confButtonCountDown = 5; // 5 seconds
-
 
 /**
  * Check if user is pressing the configuration button for more then 5 seconds
@@ -84,6 +79,3 @@ void checkConfigurationButton(uint8_t pinNum) {
 		}
 	}
 }
-
-
-

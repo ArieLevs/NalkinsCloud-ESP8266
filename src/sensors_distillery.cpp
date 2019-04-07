@@ -18,68 +18,46 @@
 #define MAXDO  4 // D2
 #define MAXCS  0 // D3
 
-// initialize the Thermocouple
-Adafruit_MAX31855 thermocouple(MAXCLK, MAXCS, MAXDO);
+// Declare Thermocouple type of MAX31855
+Adafruit_MAX31855 *thermocouple = nullptr;
+double temperature_c;
+Buzzer *alarmBuzzer = nullptr;
 
 // Declare and set default values
-extern int mainHeaterStartTemperature;
-extern int waterCoolerStartTemperature;
-extern int airCoolerStartTemperature;
-extern int toBarrelDisposalStartTemperature;
+int mainHeaterStartTemperature;
+int waterCoolerStartTemperature;
+int airCoolerStartTemperature;
+int toBarrelDisposalStartTemperature;
 
-extern bool wasGarbageDisposalExecuted;
-extern bool garbageDisposalMadeTimeSnapshot;
-extern bool barrelDisposalMadeTimeSnapshot;
-extern bool wasBarrelDisposalExecuted;
-extern bool isErrorOccurred;
+bool wasGarbageDisposalExecuted;
+bool garbageDisposalMadeTimeSnapshot;
+bool barrelDisposalMadeTimeSnapshot;
+bool wasBarrelDisposalExecuted;
+bool isErrorOccurred;
 
 bool isAutomatedJob = false; // Flag that store if device is on automation mode
-
-//Set time to "delay" a publish message
-unsigned long previousPublish = 0;
-const long publishInterval = 10000; // interval at which to send message (milliseconds)
 
 // Set garbage / barrel logic variables
 unsigned long garbageDisposalTimeSnapshot = 0; // Store current timestamp for garbage
 unsigned long barrelDisposalTimeSnapshot = 0; // Store current timestamp for barrel
 const long barrelAndGarbageDisposalStopExecute = 20000; // Stop garbage / barrel disposal after (milliseconds)
 
-//Set time to "delay" buzzer intervals
-unsigned long buzzerPreviousStart = 0;
-const long buzzerInterval = 1000; // interval at which to send message (milliseconds)
-bool buzzerIsOn = false;
-
-/* Add below row to setup() function
-// wait for MAX31855 chip to stabilize
-delay(500);
-*/
-
-/*  Function will return temperature value as double
- *  In case there is something wrong with the sensor
- *  function will return value of 9999
+/**
+ * Function will return temperature value as double
+ * In case there is something wrong with the sensor
+ * function will return value of 9999
+ *
+ * Add below row to setup() function
+ * wait for MAX31855 chip to stabilize
+ * delay(500);
  */
 double getTempFromMAX31855() {
-	double celsiusTemp = thermocouple.readCelsius(); // Get data from sensor
+	double celsiusTemp = thermocouple->readCelsius(); // Get data from sensor
 	if (isnan(celsiusTemp)) { // If there is some error reading temp value
 		Serial.println("Error with thermocouple.");
 		return -9999;
-	} else { // If all is OK, return the value
+	} else
 		return celsiusTemp;
-	}
-}
-
-void doAlarmBuzzer() {
-	unsigned long currentMillis = millis();
-	if (currentMillis - buzzerPreviousStart >= buzzerInterval) {
-		buzzerPreviousStart = currentMillis;
-		if (buzzerIsOn) {
-			noTone(BUZZER);
-			buzzerIsOn = false;
-		} else {
-			tone(BUZZER, BUZZER_FREQUENCY); // Do sound
-			buzzerIsOn = true;
-		}
-	}
 }
 
 /**
@@ -115,8 +93,6 @@ void sendDataToSensor(const char *topic, byte *payload) {
 
 	// If received message is 'automation' then
 	if (areCharArraysEqual(topicArray[2], "automation")) {
-
-		// If received 1 then
 		if ((char) payload[0] == '1') {
 			/**
 			*  automation payload is build like: ("1,w,x,y,z")
@@ -127,11 +103,9 @@ void sendDataToSensor(const char *topic, byte *payload) {
 			*/
 			// Char array that will store the message in parts
 			char *messageArray[5];
-
 			i = 0;
 			// Get the first section from topic
 			messageArray[i] = strtok((char *) payload, ",");
-			Serial.println(messageArray[i]);
 
 			// Brake the message string into parts
 			// Each array cell contains part of the topic
@@ -183,77 +157,17 @@ void sendDataToSensor(const char *topic, byte *payload) {
 			barrelDisposalMadeTimeSnapshot = false;
 			wasBarrelDisposalExecuted = false;
 		}
-
 	}
-
-	/*
-	//Case SSR received on sensor section of topic
-	else if (areEqual(topicArray[2], "ssr")) {
-	  if((char)payload[0] == '1') { // Case SSR 1 received
-		if(led1Status) { // If current state is true then
-		  digitalWrite(LED_MAIN_SSR, LOW);
-		  led1Status = false;
-		} else {
-		  digitalWrite(LED_MAIN_SSR, HIGH);
-		  led1Status = true;
-		}
-		if (DEBUG)
-		  Serial.println("LED_MAIN_SSR power changed");
-	  }
-
-	  else if((char)payload[0] == '2') { // Case SSR 2 received
-		if(led2Status) { // If current state is true then
-		  digitalWrite(LED_DISPOSAL_SSR, LOW);
-		  led2Status = false;
-		} else {
-		  digitalWrite(LED_DISPOSAL_SSR, HIGH);
-		  led2Status = true;
-		}
-		if (DEBUG)
-		  Serial.println("LED_DISPOSAL_SSR power changed");
-	  }
-
-	  else if((char)payload[0] == '3') { // Case SSR 3 received
-		if(led3Status) { // If current state is true then
-		  digitalWrite(LED_SECONDARY_SSR, LOW);
-		  led3Status = false;
-		} else {
-		  digitalWrite(LED_SECONDARY_SSR, HIGH);
-		  led3Status = true;
-		}
-		if (DEBUG)
-		  Serial.println("LED_SECONDARY_SSR power changed");
-	  }
-
-	  else if((char)payload[0] == '4') { // Case SSR 4 received
-		if(led4Status) { // If current state is true then
-		  digitalWrite(LED_COOLER, LOW); // Send 'LOW' to sensor
-		  led4Status = false; // And set state to false
-		} else {
-		  digitalWrite(LED_COOLER, HIGH);
-		  led4Status = true;
-		}
-		if (DEBUG)
-		  Serial.println("LED_COOLER power changed");
-	  }
-	}*/
 }
 
-// Function will perform automated job for special distillery work
+/**
+ * Perform distillery work logic here
+ *
+ * This will keep main heater temperature at default 94 C,
+ * Once temperature is above default temperature, main heater turns off
+ * Once temperature is again below default temperature, main heater turns on
+ */
 void doDistilleryJob() {
-	// Get temperature from sensor
-	char message[sizeof(float)];
-	double temperature_c;
-	temperature_c = getTempFromMAX31855(); // Get temperature from MAX chip
-	dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
-	if (DEBUG) {
-		Serial.print("temperature_c: ");
-		Serial.println(message);
-	}
-
-	// This will store main heater temperature at default 94 C,
-	// Once temperature is above default temperature, main heater turns off
-	// Once temperature is again below default temperature, main heater turns on
 	if (temperature_c < mainHeaterStartTemperature) // Default temperature is 94C
 		digitalWrite(MAIN_HEATER, HIGH);
 	else
@@ -358,18 +272,37 @@ void doDistilleryJob() {
 	}*/
 }
 
-// Function will publish a message for each sensor configured here
+/**
+ * Collect data from sensors
+ */
 void getDataFromSensor() {
-
-	if (isErrorOccurred) {
-		doAlarmBuzzer();
+	temperature_c = getTempFromMAX31855(); // Get temperature from MAX chip
+	if (temperature_c == -9999) { // In case there was an error with the chip MAX returns -9999
+		if (DEBUG)
+			Serial.println("Failed to read temperature from MAX31855k sensor.");
+		return;
 	}
+	if (DEBUG) {
+		Serial.print("Temperature is (C): ");
+		Serial.println(temperature_c);
+	}
+
+	if (isErrorOccurred)
+		alarmBuzzer->executeBuzzer();
 
 	// Check if automation job requested for distillery job
-	if (isAutomatedJob) {
+	if (isAutomatedJob)
 		doDistilleryJob();
-	}
+}
 
+//Set time to "delay" a publish message
+unsigned long previousPublish = 0;
+const long publishInterval = 10000; // interval at which to send message (milliseconds)
+
+/**
+ * Publish all data to the mqtt broker
+ */
+void publishDataToServer() {
 	//For each sensor, check its last publish time
 	unsigned long currentMillis = millis();
 	if (currentMillis - previousPublish >= publishInterval) {
@@ -377,26 +310,12 @@ void getDataFromSensor() {
 
 		String topic;
 		char message[sizeof(float)];
-		float temperature_c;
 
-		temperature_c = getTempFromMAX31855(); // Get temperature from MAX chip
-		//If there was an error reading data from sensor then
-		if (temperature_c == -9999) { // In case there was an error with the chip MAX returns -9999
-			if (DEBUG)
-				Serial.println("Failed to read temperature from MAX31855k sensor.");
-			return;
-		}
-		if (DEBUG) {
-			Serial.print("Temperature is (C): ");
-			Serial.println(temperature_c);
-		}
-
-		topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relevant sensor
+		topic = generalTopic + "temperature"; // Set a topic string that will change depending on the relevant sensor
 		dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
-		publishMessageToMQTTBroker((char *) topic.c_str(), message, notRetained); //Send the data
+		publishMessageToMQTTBroker((char *) topic.c_str(), message, notRetained); // Send the data
 	}
 }
-
 
 /**
  * Subscribe to all relevant sensors connected
@@ -408,11 +327,13 @@ void getSensorsInformation() {
 	subscribeToMQTTBroker((char *) topic.c_str());
 }
 
-
 /**
  * Initialize all sensors present in the system
  */
 void initSensor() {
+	thermocouple = new Adafruit_MAX31855(MAXCLK, MAXCS, MAXDO);
+	alarmBuzzer = new Buzzer(BUZZER, BUZZER_FREQUENCY, 1000);
+
 	pinMode(MAIN_HEATER, OUTPUT);
 	pinMode(WATER_COOLER, OUTPUT);
 	pinMode(AIR_COOLER, OUTPUT);
