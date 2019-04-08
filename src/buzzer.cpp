@@ -18,6 +18,13 @@ void Buzzer::executeBuzzer() {
 	}
 }
 
+void Buzzer::initBuzzer() {
+	tone(buzzerPin, buzzerFrequency);
+	delay(100);
+	noTone(buzzerPin);
+	buzzerIsOn = false;
+}
+
 void Buzzer::stopBuzzer() {
 	noTone(buzzerPin);
 	buzzerIsOn = false;

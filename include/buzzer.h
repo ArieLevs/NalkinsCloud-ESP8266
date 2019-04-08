@@ -13,6 +13,7 @@ public:
 
 	void executeBuzzer();
 	void stopBuzzer();
+	void initBuzzer();
 
 private:
 	uint8_t buzzerPin;
