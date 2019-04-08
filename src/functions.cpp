@@ -28,6 +28,29 @@ uint8_t *getMacAddress() {
 }
 
 /**
+ * Function will split a topic by a delimiter
+ *
+ * @param topic The topic to split into strings
+ * @return
+ */
+char *brakeTopic(const char *topic) {
+	// topic should be of type: "device_id/device_type/data"
+	// Char array that will store the topic in parts
+	char *topicArray[4];
+
+	int i = 0;
+	// Get the first section from topic
+	topicArray[i] = strtok((char *) topic, "/");
+
+	// Brake the topic string into parts
+	// Each array cell contains part of the topic
+	while (topicArray[i] != NULL) {
+		topicArray[++i] = strtok(NULL, "/");
+	}
+	return *topicArray;
+}
+
+/**
  * Compare two strings (char arrays)
  * 
  * @param s1 string

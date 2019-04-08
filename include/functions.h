@@ -17,4 +17,6 @@ String macToStr(uint8_t *mac);
 
 bool areCharArraysEqual(const char *s1, const char *s2);
 
+char *brakeTopic(const char *topic);
+
 #endif //NALKINSCLOUD_ESP8266_FUNCTIONS_H
