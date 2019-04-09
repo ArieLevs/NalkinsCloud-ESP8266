@@ -104,22 +104,18 @@ void loop(void) {
 		blinkConfigurationMode(LED_WORK_STATUS);
 		handleClient();
 	} else { // If device is on normal work mode
-		checkConfigurationButton(
-				CONFIGURATION_MODE_BUTTON); // Check if user is pressing the configuration button for more than 5 seconds
+		getDataFromSensor(); // Execute main work here
+		checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
 				//sendWifiSignalStrength();
-				getDataFromSensor(); // Get data from sensor(s) and Publish the message
+				publishDataToServer(); // Publish the all sensor messages
 				blinkWorkMode(LED_WORK_STATUS);
 			} else {
-				if (checkMQTTConnection()) { // Try to connect/reconnect
+				if (checkMQTTConnection()) // Try to connect/reconnect
 					getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
-				}
 			}
-		} else {
-			// TODO add doOfflineWork here
-			if (DEBUG)
-				Serial.println("Wifi handler is taking place");
+		} else { // Wifi handler is taking place in this point
 			if (isClientConnectedToMQTTServer())
 				disconnectFromMQTTBroker();
 			blinkWifiDisconnected(LED_WORK_STATUS);
