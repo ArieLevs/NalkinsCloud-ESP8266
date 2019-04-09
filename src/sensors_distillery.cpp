@@ -8,11 +8,11 @@
 
 #include "Adafruit_MAX31855.h"
 
-#define MAIN_HEATER 	 1 // Main SSR IO pin
-#define WATER_COOLER 	 3 // Watter Cooler SSR IO pin
-#define AIR_COOLER 		 5 // Air Cooler SSR IO pin
-#define GARBAGE_DISPOSAL 4 // To Garbage SSR IO pin
-#define BARREL_DISPOSAL  0 // To Barrel SSR IO pin
+#define MAIN_HEATER 	 1  // GPIO01 -> TX, Main SSR IO pin
+#define WATER_COOLER 	 3  // GPIO03 -> RX, Watter Cooler SSR IO pin
+#define AIR_COOLER 		 16 // GPIO16 -> D0, Air Cooler SSR IO pin
+#define GARBAGE_DISPOSAL 12 // GPIO12 -> D6, To Garbage SSR IO pin
+#define BARREL_DISPOSAL  15 // GPIO15 -> D8, To Barrel SSR IO pin
 
 #define MAXCLK 5 // D1
 #define MAXDO  4 // D2
@@ -333,13 +333,15 @@ void getSensorsInformation() {
 void initSensor() {
 	thermocouple = new Adafruit_MAX31855(MAXCLK, MAXCS, MAXDO);
 	alarmBuzzer = new Buzzer(BUZZER, BUZZER_FREQUENCY, 1000);
+	alarmBuzzer->initBuzzer();
+	alarmBuzzer->stopBuzzer();
 
-	pinMode(MAIN_HEATER, OUTPUT);
+	//pinMode(MAIN_HEATER, OUTPUT);
 	pinMode(WATER_COOLER, OUTPUT);
 	pinMode(AIR_COOLER, OUTPUT);
 	pinMode(GARBAGE_DISPOSAL, OUTPUT);
 	pinMode(BARREL_DISPOSAL, OUTPUT);
-	digitalWrite(MAIN_HEATER, LOW);
+	//digitalWrite(MAIN_HEATER, LOW);
 	digitalWrite(WATER_COOLER, LOW);
 	digitalWrite(AIR_COOLER, LOW);
 	digitalWrite(GARBAGE_DISPOSAL, LOW);

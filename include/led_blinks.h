@@ -5,10 +5,19 @@
 #ifndef NALKINSCLOUD_ESP8266_LED_BLINKS_H
 #define NALKINSCLOUD_ESP8266_LED_BLINKS_H
 
-void blinkConfigurationMode(uint8_t ledIoNum);
+#include <Arduino.h>
 
-void blinkWorkMode(uint8_t ledIoNum);
+class LedBlinks {
+public:
+	explicit LedBlinks(uint8_t _ledPin);
 
-void blinkWifiDisconnected(uint8_t ledIoNum);
+	void intervalBlink(long interval);
+	void rapidIntervalBlink(long interval);
+
+private:
+	uint8_t ledPin;
+	unsigned long blinkPreviousStart;
+	uint8_t ledState;
+};
 
 #endif //NALKINSCLOUD_ESP8266_LED_BLINKS_H

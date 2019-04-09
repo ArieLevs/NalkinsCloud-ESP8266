@@ -14,7 +14,7 @@
 #define CONFIGURATION_MODE_BUTTON 13 // GPIO13 -> D7, Pin which define the button that sets the device to configuration mode
 #define BUZZER 14					 // GPIO14 -> D5
 #define BUZZER_FREQUENCY 1000
-#define LED_WORK_STATUS 2			 // GPIO2 -> D4
+#define LED_PIN 2			 		 // GPIO2 -> D4
 
 extern String deviceType; // The devices type definition
 extern String deviceId; // The devices unique id

@@ -1,71 +1,49 @@
 
-#include <Arduino.h>
-
-// Set delay for the AP (configuration) mode LED blink
-unsigned long previousConfigurationMode = 0;
-const long ConfigurationModeInterval = 500;
-uint8_t ledState = LOW;
+#include "led_blinks.h"
 
 /**
- * Perform led blink to indicate device is on configuration mode
+ * Blink led pin with given interval times
+ * NOTE that 'LOW' switches the LED *on* and 'HIGH' to *off*
  *
- * @param uint8_t GPIO number of LED pin
+ * @param interval
  */
-void blinkConfigurationMode(uint8_t ledIoNum) {
+void LedBlinks::intervalBlink(long interval) {
 	unsigned long currentMillis = millis();
-	if (currentMillis - previousConfigurationMode >=
-		ConfigurationModeInterval) { // Blink LED when on configuration mode
-		previousConfigurationMode = currentMillis;
+	if (currentMillis - blinkPreviousStart >= interval) {
+		blinkPreviousStart = currentMillis;
 		if (ledState == LOW)
-			ledState = HIGH;  // Note that this switches the LED *off*
+			ledState = HIGH;
 		else
-			ledState = LOW;   // Note that this switches the LED *on*
-		digitalWrite(ledIoNum, ledState);
+			ledState = LOW;
+		digitalWrite(ledPin, ledState);
 	}
 }
 
-// Set delay for the normal mode LED blink
-unsigned long previousWorkMode = 0;
-const long workModeInterval = 2500;
-
 /**
- * Perform led blink to indicate device is at normal work mode
+ * Blink led pin twice rapidly with given interval times
+ * NOTE that 'LOW' switches the LED *on* and 'HIGH' to *off*
  *
  * @param uint8_t GPIO number of LED pin
  */
-void blinkWorkMode(uint8_t ledIoNum) {
+void LedBlinks::rapidIntervalBlink(long interval) {
 	unsigned long currentMillis = millis();
-	if (currentMillis - previousWorkMode >= workModeInterval) { // Blink LED when on work mode
-		previousWorkMode = currentMillis;
-		if (ledState == LOW)
-			ledState = HIGH;  // Note that this switches the LED *off*
-		else
-			ledState = LOW;   // Note that this switches the LED *on*
-		digitalWrite(ledIoNum, ledState);
+	if (currentMillis - blinkPreviousStart >= interval) {
+		blinkPreviousStart = currentMillis;
+		digitalWrite(ledPin, LOW);
+		delay(50);
+		digitalWrite(ledPin, HIGH);
+		delay(50);
+		digitalWrite(ledPin, LOW);
+		delay(50);
+		digitalWrite(ledPin, HIGH);
 	}
 }
 
+LedBlinks::LedBlinks(uint8_t _ledPin) {
+	ledPin = _ledPin;
+	blinkPreviousStart = 0;
+	ledState = 0;
 
-// Set delay for wifi disconnected mode LED blink
-unsigned long previousWifiError = 0;
-const long wifiErrorInterval = 2000;
-
-/**
- * Perform led blink to indicate device lost wifi connection
- *
- * @param uint8_t GPIO number of LED pin
- */
-void blinkWifiDisconnected(uint8_t ledIoNum) {
-	unsigned long currentMillis = millis();
-	if (currentMillis - previousWifiError >= wifiErrorInterval) { // Blink LED when wifi disconnected
-		previousWorkMode = currentMillis;
-
-		digitalWrite(ledIoNum, HIGH);
-		delay(50);
-		digitalWrite(ledIoNum, LOW);
-		delay(50);
-		digitalWrite(ledIoNum, HIGH);
-		delay(50);
-		digitalWrite(ledIoNum, LOW);
-	}
+	pinMode(ledPin, OUTPUT);
+	digitalWrite(ledPin, LOW);
 }

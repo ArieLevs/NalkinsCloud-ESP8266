@@ -103,7 +103,4 @@ void initSensor() {
 
 	pinMode(SWITCH_OUT, OUTPUT);
 	pinMode(SWITCH_IN, INPUT);
-
-	pinMode(LED_WORK_STATUS, OUTPUT);
-	digitalWrite(LED_WORK_STATUS, LOW);
 }

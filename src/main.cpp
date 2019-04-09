@@ -12,6 +12,7 @@
 #include "sensors.h" // Load sensors global variables // THIS SHOULD BE CHANGED ON DEVICE CHANGE
 
 strConfigs configs;
+LedBlinks *ledBlink = nullptr;
 
 void setup(void) {
 	delay(500);
@@ -22,6 +23,8 @@ void setup(void) {
 
 	initConfigs();
 	initSensor(); // Setup device GPIOs
+
+	ledBlink = new LedBlinks(LED_PIN); // Init led blinker object
 
 	initEEPROM();
 	//clearEEPROM();  // Unmark to remove all data from EEPROM
@@ -101,7 +104,7 @@ void setup(void) {
 void loop(void) {
 	delay(50);
 	if (getConfigurationMode()) { // If device on configuration mode then handle http server
-		blinkConfigurationMode(LED_WORK_STATUS);
+		ledBlink->intervalBlink(500);
 		handleClient();
 	} else { // If device is on normal work mode
 		getDataFromSensor(); // Execute main work here
@@ -110,7 +113,7 @@ void loop(void) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
 				//sendWifiSignalStrength();
 				publishDataToServer(); // Publish the all sensor messages
-				blinkWorkMode(LED_WORK_STATUS);
+				ledBlink->intervalBlink(2500);
 			} else {
 				if (checkMQTTConnection()) // Try to connect/reconnect
 					getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
@@ -118,7 +121,7 @@ void loop(void) {
 		} else { // Wifi handler is taking place in this point
 			if (isClientConnectedToMQTTServer())
 				disconnectFromMQTTBroker();
-			blinkWifiDisconnected(LED_WORK_STATUS);
+			ledBlink->rapidIntervalBlink(2000);
 		}
 	}
 } 

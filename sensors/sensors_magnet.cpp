@@ -111,8 +111,5 @@ void initSensor() {
 	currentMagnetStatus = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
 	alarmBuzzer = new Buzzer(BUZZER, BUZZER_FREQUENCY, 1000);
 
-	pinMode(LED_WORK_STATUS, OUTPUT);
-	digitalWrite(LED_WORK_STATUS, LOW);
-
 	pinMode(MAGNET_INPUT_PIN, INPUT);
 }
