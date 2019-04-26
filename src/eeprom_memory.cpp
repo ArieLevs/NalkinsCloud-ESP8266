@@ -123,6 +123,21 @@ void readNetworkConfigs() {
 	}
 }
 
+void writeIntToEEPROM(int address, uint8_t value) {
+	EEPROM.write(address, value);
+	if (DEBUG) {
+		Serial.print("\nsetDistilleryData on address: ");
+		Serial.print(address);
+		Serial.print("\n set to: ");
+		Serial.println(value);
+	}
+	EEPROM.commit();
+}
+
+uint8_t readIntFromEEPROM(int address) {
+	return EEPROM.read(address);
+}
+
 /**
  * Read string beginning at a given address
  * Max string size in EEPROM is 32

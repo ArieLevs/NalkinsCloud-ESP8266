@@ -8,11 +8,21 @@
 
 #include "Adafruit_MAX31855.h"
 
-#define MAIN_HEATER 	 1  // GPIO01 -> TX, Main SSR IO pin
-#define WATER_COOLER 	 3  // GPIO03 -> RX, Watter Cooler SSR IO pin
-#define AIR_COOLER 		 16 // GPIO16 -> D0, Air Cooler SSR IO pin
+#define MAIN_HEATER     1  // GPIO01 -> TX, Main SSR IO pin
+#define WATER_COOLER     3  // GPIO03 -> RX, Watter Cooler SSR IO pin
+#define AIR_COOLER         16 // GPIO16 -> D0, Air Cooler SSR IO pin
 #define GARBAGE_DISPOSAL 12 // GPIO12 -> D6, To Garbage SSR IO pin
 #define BARREL_DISPOSAL  15 // GPIO15 -> D8, To Barrel SSR IO pin
+
+
+// Bits	300-306 reserved for distillery sensor data
+// - bit 301		hold if automation job executed
+// - bits 302-305	hold temperature configs
+#define AUTOMATION_STATUS_ADDR        301
+#define MAIN_HEATER_TEMP_ADDR        302
+#define WATER_COOLER_TEMP_ADDR        303
+#define AIR_COOLER_TEMP_ADDR        304
+#define BARREL_DISPOSAL_TEMP_ADDR    305
 
 #define MAXCLK 5 // D1
 #define MAXDO  4 // D2
@@ -94,6 +104,10 @@ void sendDataToSensor(const char *topic, byte *payload) {
 	// If received message is 'automation' then
 	if (areCharArraysEqual(topicArray[2], "automation")) {
 		if ((char) payload[0] == '1') {
+
+			// Performing work, make sure work status saved
+			writeIntToEEPROM(AUTOMATION_STATUS_ADDR, 1);
+
 			/**
 			*  automation payload is build like: ("1,w,x,y,z")
 			*  v - temperature when main ssr stop working
@@ -118,11 +132,18 @@ void sendDataToSensor(const char *topic, byte *payload) {
 				}
 			}
 
+			char *ptr;
 			// Set variables from message to temperature vars
-			mainHeaterStartTemperature = atoi(messageArray[1]);
-			waterCoolerStartTemperature = atoi(messageArray[2]);
-			airCoolerStartTemperature = atoi(messageArray[3]);
-			toBarrelDisposalStartTemperature = atoi(messageArray[4]);
+			mainHeaterStartTemperature = strtol(messageArray[1], &ptr, 10);
+			waterCoolerStartTemperature = strtol(messageArray[2], &ptr, 10);
+			airCoolerStartTemperature = strtol(messageArray[3], &ptr, 10);
+			toBarrelDisposalStartTemperature = strtol(messageArray[4], &ptr, 10);
+
+			// Save temperature configurations
+			writeIntToEEPROM(MAIN_HEATER_TEMP_ADDR, (uint8_t) mainHeaterStartTemperature);
+			writeIntToEEPROM(WATER_COOLER_TEMP_ADDR, (uint8_t) waterCoolerStartTemperature);
+			writeIntToEEPROM(AIR_COOLER_TEMP_ADDR, (uint8_t) airCoolerStartTemperature);
+			writeIntToEEPROM(BARREL_DISPOSAL_TEMP_ADDR, (uint8_t) toBarrelDisposalStartTemperature);
 			if (DEBUG) {
 				Serial.println("Temperature configurations set to:");
 				Serial.print("MAIN_HEATER: ");
@@ -143,6 +164,9 @@ void sendDataToSensor(const char *topic, byte *payload) {
 			digitalWrite(GARBAGE_DISPOSAL, LOW);
 			digitalWrite(BARREL_DISPOSAL, LOW);
 		} else if ((char) payload[0] == '0') { // If received 0 then
+			// Stopped work, make sure work status saved
+			writeIntToEEPROM(AUTOMATION_STATUS_ADDR, 0);
+
 			isAutomatedJob = false;
 			isErrorOccurred = false;
 
@@ -331,6 +355,12 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
+	// Read temperature configurations
+	mainHeaterStartTemperature = readIntFromEEPROM(MAIN_HEATER_TEMP_ADDR);
+	waterCoolerStartTemperature = readIntFromEEPROM(WATER_COOLER_TEMP_ADDR);
+	airCoolerStartTemperature = readIntFromEEPROM(AIR_COOLER_TEMP_ADDR);
+	toBarrelDisposalStartTemperature = readIntFromEEPROM(BARREL_DISPOSAL_TEMP_ADDR);
+
 	thermocouple = new Adafruit_MAX31855(MAXCLK, MAXCS, MAXDO);
 	alarmBuzzer = new Buzzer(BUZZER, BUZZER_FREQUENCY, 1000);
 	alarmBuzzer->initBuzzer();

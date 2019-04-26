@@ -10,10 +10,8 @@ PubSubClient mqttClient;
 
 void initMqttClient() {
 	wifiClientSecure = WiFiClientSecure();
-	if (isSslEncrypted) {
+	if (isSslEncrypted)
 		wifiClientSecure.setFingerprint(fingerprint);
-		Serial.print("################");
-	}
 	else
 		wifiClientSecure.setInsecure();
 	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure);
@@ -128,7 +126,7 @@ bool checkMQTTConnection() {
  *
  * @return String full topic (as of DEVICE_ID/DEVICE_TYPE/DATA)
  */
-String generateTopic(const char* data) {
+String generateTopic(const char *data) {
 	String result = "";
 	result += deviceId.c_str();
 	result += "/";
@@ -160,7 +158,7 @@ String generateTopic(const char* data) {
  */
 String printMqttConnectionStatus(int return_code) {
 
-	switch(return_code) {
+	switch (return_code) {
 		case -4 :
 			return "MQTT_CONNECTION_TIMEOUT (-4) - the server didn't respond within the keepalive time";
 		case -3 :
