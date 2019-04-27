@@ -126,9 +126,9 @@ void readNetworkConfigs() {
 void writeIntToEEPROM(int address, uint8_t value) {
 	EEPROM.write(address, value);
 	if (DEBUG) {
-		Serial.print("\nsetDistilleryData on address: ");
+		Serial.print("\naddress: ");
 		Serial.print(address);
-		Serial.print("\n set to: ");
+		Serial.print(" | set to: ");
 		Serial.println(value);
 	}
 	EEPROM.commit();
@@ -192,12 +192,12 @@ void clearEEPROM() {
  * @param configurationStatus integer number (should be 0 or 1) to be writen to EEPROM
  */
 void setConfigurationStatusFlag(uint8_t configurationStatus) {
-	EEPROM.write(CONFIGURATION_MODE_ADDR, configurationStatus); // Write given value to CONFIGURATION_MODE_ADDR (494)
+	// Write given value to CONFIGURATION_MODE_ADDR (494)
+	writeIntToEEPROM(CONFIGURATION_MODE_ADDR, configurationStatus);
 	if (DEBUG) {
 		Serial.print("ConfigurationStatus set to: ");
 		Serial.println(configurationStatus);
 	}
-	EEPROM.commit();
 }
 
 /**
@@ -207,7 +207,7 @@ void setConfigurationStatusFlag(uint8_t configurationStatus) {
  *                  false - value in different from 1
  */
 bool getConfigurationStatusFlag() {
-	int value = EEPROM.read(CONFIGURATION_MODE_ADDR);
+	int value = readIntFromEEPROM(CONFIGURATION_MODE_ADDR);
 	if (DEBUG) {
 		Serial.print("configuration status is: ");
 		Serial.println(value);
@@ -223,15 +223,14 @@ bool getConfigurationStatusFlag() {
  */
 void setServiceMode(int serviceMode) {
 	if (serviceMode == 0) {
-		EEPROM.write(SERVICE_MODE_FLAG_ADDR, 0);
+		writeIntToEEPROM(SERVICE_MODE_FLAG_ADDR, 0);
 		if (DEBUG)
 			Serial.println("Service mode set to standalone (0)");
 	} else {
-		EEPROM.write(SERVICE_MODE_FLAG_ADDR, 1);
+		writeIntToEEPROM(SERVICE_MODE_FLAG_ADDR, 1);
 		if (DEBUG)
 			Serial.println("Service mode set to local-server (1)");
 	}
-	EEPROM.commit();
 }
 
 /**
@@ -241,7 +240,7 @@ void setServiceMode(int serviceMode) {
  *                  false - value in different from 1
  */
 int getServiceMode() {
-	int answer = EEPROM.read(SERVICE_MODE_FLAG_ADDR);
+	int answer = readIntFromEEPROM(SERVICE_MODE_FLAG_ADDR);
 	if (DEBUG) {
 		Serial.print("Service mode is: ");
 		Serial.println(answer);
