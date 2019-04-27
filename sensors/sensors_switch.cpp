@@ -10,6 +10,7 @@
 #define SWITCH_OUT 0 // GPIO0 -> D3
 
 // By default device is false
+int lastSwitchStatePublish;
 int lastSwitchState;
 int currentSwitchState;
 
@@ -21,8 +22,8 @@ const long consumptionPublishInterval = 120000; // interval at which to send mes
  * Publish all data to the mqtt broker
  */
 void publishDataToServer() {
-	if (currentSwitchState != lastSwitchState) {
-		lastSwitchState = currentSwitchState; // Remember new switch state
+	if (currentSwitchState != lastSwitchStatePublish) {
+		lastSwitchStatePublish = currentSwitchState; // Remember new switch state
 		String topic = generalTopic + "from_device_current_status";
 		publishMessageToMQTTBroker((char *) topic.c_str(), (char *) String(currentSwitchState).c_str(), retained);
 	}
@@ -102,6 +103,7 @@ void initSensor() {
 	deviceId = "test_switch_device_id"; // The devices unique id
 	chipType = "ESP8266"; // The devices chip type
 
+	lastSwitchStatePublish = digitalRead(SWITCH_IN);
 	lastSwitchState = digitalRead(SWITCH_IN);
 	currentSwitchState = digitalRead(SWITCH_IN);
 	// TODO separate below

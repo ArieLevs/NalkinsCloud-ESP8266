@@ -26,6 +26,7 @@ bool isAlarmSent = false;
 bool isTriggered = false;
 
 int currentMagnetStatus;
+int lastMagnetPublish;
 int lastMagnetState;
 
 PIR *motionSensor = nullptr;
@@ -36,9 +37,9 @@ PIR *motionSensor = nullptr;
 void publishDataToServer() {
 	String topic = generalTopic + SEND_STATUS; // Setup the publish topic
 
-	if (lastMagnetState != currentMagnetStatus) { // If there was a change in the magnet status then
+	if (lastMagnetPublish != currentMagnetStatus) { // If there was a change in the magnet status then
 		publishMessageToMQTTBroker((char *) topic.c_str(), (char *) String(currentMagnetStatus).c_str(), retained);
-		lastMagnetState = currentMagnetStatus;
+		lastMagnetPublish = currentMagnetStatus;
 	}
 
 	if (isAlarmOn && !isAlarmSent) { // If Alarm triggered, and the alarm was not sent yet (before release received) then
@@ -96,17 +97,17 @@ void sendDataToSensor(const char *topic, byte *payload) {
  */
 void getDataFromSensor() {
 	currentMagnetStatus = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
-	if (DEBUG) {
-		if (lastMagnetState != currentMagnetStatus) { // If there was a change in the magnet status then
+
+	if (lastMagnetState != currentMagnetStatus) { // If there was a change in the magnet status then
+		// If device is triggered, And magnet is in opened state then, Set alarm flag
+		if (isTriggered && (lastMagnetState == LOCKED) && (currentMagnetStatus == OPENED))
+			isAlarmOn = true;
+		if (DEBUG) {
 			Serial.print("Current magnet state: ");
 			Serial.println(currentMagnetStatus);
-			lastMagnetState = currentMagnetStatus;
 		}
+		lastMagnetState = currentMagnetStatus;
 	}
-
-	// If device is triggered // And magnet is in opened state then, Set alarm flag
-	if (isTriggered && (lastMagnetState == LOCKED) && (currentMagnetStatus == OPENED))
-		isAlarmOn = true;
 
 	if (isAlarmOn) // If alarm flag is set on (alarm triggered) then
 		alarmBuzzer->executeBuzzer();
@@ -129,10 +130,13 @@ void initSensor() {
 	motionSensor = new PIR(PIR_INPUT_PIN);
 
 	deviceType = "magnet"; // The devices type definition
-	deviceId = "test_magnet_device_id"; // The devices unique id
+	deviceId = "test_magnet_simulator"; // The devices unique id
 	chipType = "ESP8266"; // The devices chip type
 
-	lastMagnetState = 2; // Set some non 0 or 1 value on init, so message will be published on start
+	// Set some non 0 or 1 value on init, so message will be published on start
+	lastMagnetState = 2;
+	lastMagnetPublish = 2;
+
 	currentMagnetStatus = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
 	alarmBuzzer = new Buzzer(BUZZER, BUZZER_FREQUENCY, 1000);
 	alarmBuzzer->initBuzzer();
