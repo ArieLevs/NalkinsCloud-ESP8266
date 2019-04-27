@@ -38,12 +38,18 @@ void setup(void) {
 	//configs.mqttFingerprint = readFingerprintFromEEPROM(MQTT_FINGERPRINT_START_ADDR);
 
 	/**
-	 * TEMP
+	 * ################
+	 * TEMP starts here
 	 */
 	configs.mqttServer = "10.0.1.1";
 	configs.mqttPort = 8883;
 	configs.clientUsername = "test_dht_device";
-	configs.devicePassword = "12345678";
+	configs.devicePassword = "nalkinscloud";
+	/**
+	 * TEMP end here
+	 * #############
+	 */
+
 	if (DEBUG) {
 		Serial.println("Server configs: ");
 		Serial.print("Username: ");

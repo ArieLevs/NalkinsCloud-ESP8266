@@ -8,21 +8,21 @@
 
 #include "Adafruit_MAX31855.h"
 
-#define MAIN_HEATER     1  // GPIO01 -> TX, Main SSR IO pin
-#define WATER_COOLER     3  // GPIO03 -> RX, Watter Cooler SSR IO pin
-#define AIR_COOLER         16 // GPIO16 -> D0, Air Cooler SSR IO pin
-#define GARBAGE_DISPOSAL 12 // GPIO12 -> D6, To Garbage SSR IO pin
-#define BARREL_DISPOSAL  15 // GPIO15 -> D8, To Barrel SSR IO pin
+#define MAIN_HEATER			1  // GPIO01 -> TX, Main SSR IO pin
+#define WATER_COOLER 		3  // GPIO03 -> RX, Watter Cooler SSR IO pin
+#define AIR_COOLER			16 // GPIO16 -> D0, Air Cooler SSR IO pin
+#define GARBAGE_DISPOSAL	12 // GPIO12 -> D6, To Garbage SSR IO pin
+#define BARREL_DISPOSAL		15 // GPIO15 -> D8, To Barrel SSR IO pin
 
 
 // Bits	300-306 reserved for distillery sensor data
 // - bit 301		hold if automation job executed
 // - bits 302-305	hold temperature configs
-#define AUTOMATION_STATUS_ADDR        301
-#define MAIN_HEATER_TEMP_ADDR        302
-#define WATER_COOLER_TEMP_ADDR        303
-#define AIR_COOLER_TEMP_ADDR        304
-#define BARREL_DISPOSAL_TEMP_ADDR    305
+#define AUTOMATION_STATUS_ADDR      301
+#define MAIN_HEATER_TEMP_ADDR       302
+#define WATER_COOLER_TEMP_ADDR      303
+#define AIR_COOLER_TEMP_ADDR		304
+#define BARREL_DISPOSAL_TEMP_ADDR	305
 
 #define MAXCLK 5 // D1
 #define MAXDO  4 // D2
