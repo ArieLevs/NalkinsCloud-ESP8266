@@ -135,7 +135,14 @@ void writeIntToEEPROM(int address, uint8_t value) {
 }
 
 uint8_t readIntFromEEPROM(int address) {
-	return EEPROM.read(address);
+	uint8_t value = EEPROM.read(address);
+	if (DEBUG) {
+		Serial.print("\naddress: ");
+		Serial.print(address);
+		Serial.print(" | value is: ");
+		Serial.println(value);
+	}
+	return value;
 }
 
 /**
