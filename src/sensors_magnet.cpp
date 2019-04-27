@@ -127,7 +127,7 @@ void initSensor() {
 	deviceId = "test_magnet_device_id"; // The devices unique id
 	chipType = "ESP8266"; // The devices chip type
 
-	lastMagnetState = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
+	lastMagnetState = 2; // Set some non 0 or 1 value on init, so message will be published on start
 	currentMagnetStatus = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
 	alarmBuzzer = new Buzzer(BUZZER, BUZZER_FREQUENCY, 1000);
 	alarmBuzzer->initBuzzer();
