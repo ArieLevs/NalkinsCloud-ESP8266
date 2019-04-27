@@ -16,6 +16,9 @@
 #define MAGNET_INPUT_PIN 	4 // GPIO4 -> D2
 #define PIR_INPUT_PIN		5 // GPIO5 -> D1
 
+#define LOCKED 1 // 1 -> Locked
+#define OPENED 0 // 0 -> Opened
+
 Buzzer *alarmBuzzer = nullptr;
 
 bool isAlarmOn = false;
@@ -82,6 +85,7 @@ void sendDataToSensor(const char *topic, byte *payload) {
 			writeIntToEEPROM(IS_TRIGGERED_ADDR, (uint8_t) 0);
 			isTriggered = false;
 			isAlarmSent = false;
+			isAlarmOn = false;
 		}
 	}
 }
@@ -94,7 +98,11 @@ void sendDataToSensor(const char *topic, byte *payload) {
  */
 void getDataFromSensor() {
 	currentMagnetStatus = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
-	isAlarmOn = isTriggered && !currentMagnetStatus; // If device is triggered, and magnet is in opened state then, Set alarm flag
+
+	// If device is triggered // And magnet is in opened state then, Set alarm flag
+	if (isTriggered && (lastMagnetState == LOCKED) && (currentMagnetStatus == OPENED))
+		isAlarmOn = true;
+
 	if (isAlarmOn) // If alarm flag is set on (alarm triggered) then
 		alarmBuzzer->executeBuzzer();
 	else
@@ -126,6 +134,10 @@ void initSensor() {
 
 	// Get triggered state from EEPROM memory on boot
 	isTriggered = readIntFromEEPROM(IS_TRIGGERED_ADDR) == 1;
+	if (DEBUG) {
+		Serial.print("isTrigger status is:");
+		Serial.println(isTriggered);
+	}
 
 	pinMode(MAGNET_INPUT_PIN, INPUT);
 }
