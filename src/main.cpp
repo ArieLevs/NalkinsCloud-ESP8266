@@ -20,14 +20,13 @@ void setup(void) {
 		Serial.begin(115200);
 		Serial.println("Starting NalkinsCloud Sensor");
 	}
+	initEEPROM();
+	//clearEEPROM();  // Unmark to remove all data from EEPROM
 
 	initConfigs();
 	initSensor(); // Setup device GPIOs
 
 	ledBlink = new LedBlinks(LED_PIN); // Init led blinker object
-
-	initEEPROM();
-	//clearEEPROM();  // Unmark to remove all data from EEPROM
 
 	//Get current network and other info configurations from flash memory
 	readNetworkConfigs(); // This will also return the wifi SSID and password
