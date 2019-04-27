@@ -108,11 +108,11 @@ void setup(void) {
 
 void loop(void) {
 	delay(50);
+	getDataFromSensor(); // Execute main work here
 	if (getConfigurationMode()) { // If device on configuration mode then handle http server
 		ledBlink->intervalBlink(500);
 		handleClient();
 	} else { // If device is on normal work mode
-		getDataFromSensor(); // Execute main work here
 		checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
