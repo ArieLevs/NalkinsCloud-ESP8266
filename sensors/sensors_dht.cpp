@@ -96,6 +96,12 @@ void getDataFromSensor() {
 	if (isnan(humidity)) // If there was an error reading data from sensor then
 		if (DEBUG)
 			Serial.println("Failed to read humidity from DHT sensor!");
+	if (DEBUG) {
+		Serial.print("Current temperature C: ");
+		Serial.println(temperature_c);
+		Serial.print("Current humidity: ");
+		Serial.println(humidity);
+	}
 }
 
 

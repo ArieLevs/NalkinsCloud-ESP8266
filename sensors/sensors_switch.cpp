@@ -76,6 +76,14 @@ void sendDataToSensor(const char *topic, byte *payload) {
  */
 void getDataFromSensor() {
 	currentSwitchState = digitalRead(SWITCH_IN);
+
+	if (DEBUG) {
+		if (lastSwitchState != currentSwitchState) { // If there was a change in the magnet status then
+			Serial.print("Current switch state: ");
+			Serial.println(currentSwitchState);
+			lastSwitchState = currentSwitchState;
+		}
+	}
 }
 
 /**

@@ -93,11 +93,16 @@ void sendDataToSensor(const char *topic, byte *payload) {
 
 /**
  * Collect data from sensors
- * MAGNET_INPUT_PIN = 1 -> Locked
- * MAGNET_INPUT_PIN = 0 -> Opened
  */
 void getDataFromSensor() {
 	currentMagnetStatus = digitalRead(MAGNET_INPUT_PIN); // Get sensor state
+	if (DEBUG) {
+		if (lastMagnetState != currentMagnetStatus) { // If there was a change in the magnet status then
+			Serial.print("Current magnet state: ");
+			Serial.println(currentMagnetStatus);
+			lastMagnetState = currentMagnetStatus;
+		}
+	}
 
 	// If device is triggered // And magnet is in opened state then, Set alarm flag
 	if (isTriggered && (lastMagnetState == LOCKED) && (currentMagnetStatus == OPENED))
