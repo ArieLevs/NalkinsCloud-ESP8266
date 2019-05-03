@@ -51,7 +51,6 @@ struct strConfigs {
 	uint8_t Netmask[4];
 	uint8_t Gateway[4];
 	String devicePassword;
-	String clientUsername;
 	String mqttServer;
 	uint16_t mqttPort;
 	String mqttFingerprint;

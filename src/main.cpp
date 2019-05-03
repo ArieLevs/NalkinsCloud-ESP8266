@@ -30,7 +30,6 @@ void setup(void) {
 
 	//Get current network and other info configurations from flash memory
 	readNetworkConfigs(); // This will also return the wifi SSID and password
-	configs.clientUsername = readStringFromEEPROM(USER_NAME_START_ADDR);
 	configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_START_ADDR);
 	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_START_ADDR);
 	configs.mqttPort = (uint16_t) atoi(readStringFromEEPROM(MQTT_PORT_START_ADDR).c_str());
@@ -42,7 +41,6 @@ void setup(void) {
 	 */
 	configs.mqttServer = "10.0.1.1";
 	configs.mqttPort = 8883;
-	configs.clientUsername = "test_dht_device";
 	configs.devicePassword = "nalkinscloud";
 	/**
 	 * TEMP end here
@@ -51,8 +49,6 @@ void setup(void) {
 
 	if (DEBUG) {
 		Serial.println("Server configs: ");
-		Serial.print("Username: ");
-		Serial.println(configs.clientUsername.c_str());
 		Serial.print("Password: ");
 		Serial.println(configs.devicePassword.c_str());
 		Serial.print("MQTT Host: ");

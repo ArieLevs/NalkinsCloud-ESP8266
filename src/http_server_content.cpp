@@ -17,14 +17,12 @@ String chipType; // The devices chip type
 // Called when 'PAGE_GeneralSettings' is built (/)
 // Will send all relevant info to be displayed on page
 void webServerGetGeneralConfigurationValues() {
-	//configs.clientUsername = readStringFromEEPROM(USER_NAME_START_ADDR);
 	configs.devicePassword = readStringFromEEPROM(
 			DEVICE_PASS_START_ADDR); // Read device password from EEPROM and store to 'configs' struct
 	String values;
 	values += "version|" + versionNum + "|input\n";
 	values += "model|" + chipType + "|input\n";
 	values += "deviceid|" + deviceId + "|input\n";
-	//values += "username|" + configs.clientUsername +  "|input\n";
 	values += "devicepassword|" + configs.devicePassword + "|input\n";
 	server.send(200, "text/plain", values.c_str());
 	Serial.println(__FUNCTION__);

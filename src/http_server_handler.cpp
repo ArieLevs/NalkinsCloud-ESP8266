@@ -20,14 +20,11 @@ void handleGeneralSaved() {
 	server.on("/generalSaved", []() { // Small redirect page that indicates that general configs been saved
 		if (DEBUG)
 			Serial.println("Running generalSaved.html page");
-		if ((server.arg("device_password").length() == 8) &&
-			(server.arg("username").length() <= 16)) { // If Password is in the length of 8 chars
-			writeStringToEEPROM(USER_NAME_START_ADDR,
-								server.arg("username").c_str()); // Save customers user name to EEPROM flash memory
+		if (server.arg("device_password").length() == 8) { // If Password is in the length of 8 chars
 			writeStringToEEPROM(DEVICE_PASS_START_ADDR,
 								server.arg("device_password").c_str()); //Save the password to EEPROM flash memory
 			if (DEBUG)
-				Serial.println("User name and Device Password written to flash memory");
+				Serial.println("Device Password written to flash memory");
 			server.send_P(200, "text/html", PAGE_GeneralSettingsSaved); //And display small success redirect page
 		} else // If password length not 8 chars just go back to main menu
 		if (DEBUG)
@@ -111,7 +108,6 @@ void handleAutoConfig() {
 			// Get JSON to global variables
 			configs.wifiSsid = (const char *) jsonmsg["ssid"]; // Get SSID from JSON
 			configs.wifiPassword = (const char *) jsonmsg["wifi_pass"];
-			//configs.clientUsername = (const char*)jsonmsg["device_user"];
 			configs.devicePassword = (const char *) jsonmsg["device_pass"];
 			configs.mqttServer = (const char *) jsonmsg["mqtt_server"];
 			configs.mqttPort = (uint8_t) jsonmsg["mqtt_port"];
@@ -128,8 +124,6 @@ void handleAutoConfig() {
 				Serial.println(configs.mqttPort);
 				//Serial.print("MQTT Fingerprint set: ");
 				//Serial.println(configs.mqttFingerprint);
-				//Serial.print("clientUsername set: ");
-				//Serial.println(configs.clientUsername);
 				Serial.print("devicePassword set: ");
 				Serial.println(configs.devicePassword.c_str());
 				Serial.println("Running connection check from autoconfig");
@@ -147,7 +141,6 @@ void handleAutoConfig() {
 				// Store MQTT server info and credentials
 				writeStringToEEPROM(MQTT_SERVER_START_ADDR, configs.mqttServer);
 				writeStringToEEPROM(MQTT_PORT_START_ADDR, String(configs.mqttPort).c_str());
-				// writeStringToEEPROM(USER_NAME_START_ADDR, configs.clientUsername); //Save customers user name to flash memory
 				writeStringToEEPROM(DEVICE_PASS_START_ADDR, configs.devicePassword); //Save the password to flash memory
 
 				server.send(200, "text/plain",
