@@ -6,15 +6,6 @@
 
 bool PIR::isMotionDetected() {
 	pirState = digitalRead(pirPin); // Read PIR status
-
-
-	if (pirState == HIGH) {                     // if the PIR Sensor is HIGH
-		Serial.println("Motion detected! [start]");
-	} else {                     // if the PIR Sensor status is LOW
-		Serial.println("The motion detected ended!");
-	}
-
-
 	return pirState == HIGH;
 }
 
