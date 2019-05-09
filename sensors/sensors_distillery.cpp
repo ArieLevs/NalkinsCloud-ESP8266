@@ -8,21 +8,21 @@
 
 #include "Adafruit_MAX31855.h"
 
-#define MAIN_HEATER			1  // GPIO01 -> TX, Main SSR IO pin
-#define WATER_COOLER 		3  // GPIO03 -> RX, Watter Cooler SSR IO pin
-#define AIR_COOLER			16 // GPIO16 -> D0, Air Cooler SSR IO pin
-#define GARBAGE_DISPOSAL	12 // GPIO12 -> D6, To Garbage SSR IO pin
-#define BARREL_DISPOSAL		15 // GPIO15 -> D8, To Barrel SSR IO pin
+#define MAIN_HEATER      1  // GPIO01 -> TX, Main SSR IO pin
+#define WATER_COOLER     3  // GPIO03 -> RX, Watter Cooler SSR IO pin
+#define AIR_COOLER       16 // GPIO16 -> D0, Air Cooler SSR IO pin
+#define GARBAGE_DISPOSAL 12 // GPIO12 -> D6, To Garbage SSR IO pin
+#define BARREL_DISPOSAL  15 // GPIO15 -> D8, To Barrel SSR IO pin
 
 
 // Bits	300-306 reserved for distillery sensor data
 // - bit 301		hold if automation job executed
 // - bits 302-305	hold temperature configs
-#define AUTOMATION_STATUS_ADDR      301
-#define MAIN_HEATER_TEMP_ADDR       302
-#define WATER_COOLER_TEMP_ADDR      303
-#define AIR_COOLER_TEMP_ADDR		304
-#define BARREL_DISPOSAL_TEMP_ADDR	305
+#define AUTOMATION_STATUS_ADDR    301
+#define MAIN_HEATER_TEMP_ADDR     302
+#define WATER_COOLER_TEMP_ADDR    303
+#define AIR_COOLER_TEMP_ADDR      304
+#define BARREL_DISPOSAL_TEMP_ADDR 305
 
 #define MAXCLK 5 // D1
 #define MAXDO  4 // D2
@@ -31,6 +31,7 @@
 // Declare Thermocouple type of MAX31855
 Adafruit_MAX31855 *thermocouple = nullptr;
 double temperature_c;
+bool temperatureError = true;
 Buzzer *alarmBuzzer = nullptr;
 
 // Declare and set default values
@@ -164,6 +165,7 @@ void sendDataToSensor(const char *topic, byte *payload) {
 			digitalWrite(GARBAGE_DISPOSAL, LOW);
 			digitalWrite(BARREL_DISPOSAL, LOW);
 		} else if ((char) payload[0] == '0') { // If received 0 then
+			alarmBuzzer->stopBuzzer();
 			// Stopped work, make sure work status saved
 			writeIntToEEPROM(AUTOMATION_STATUS_ADDR, 0);
 
@@ -192,51 +194,57 @@ void sendDataToSensor(const char *topic, byte *payload) {
  * Once temperature is again below default temperature, main heater turns on
  */
 void doDistilleryJob() {
-	if (temperature_c < mainHeaterStartTemperature) // Default temperature is 94C
-		digitalWrite(MAIN_HEATER, HIGH);
-	else
-		digitalWrite(MAIN_HEATER, LOW);
+	if (temperatureError) {
+		if (DEBUG)
+			Serial.println("Failed to read temperature - not executing.");
+		alarmBuzzer->executeBuzzer();
+	} else {
+		if (temperature_c < mainHeaterStartTemperature) // Default temperature is 94C
+			digitalWrite(MAIN_HEATER, HIGH);
+		else
+			digitalWrite(MAIN_HEATER, LOW);
 
-	if (temperature_c < waterCoolerStartTemperature) // Default temperature is 60C
-		digitalWrite(WATER_COOLER, LOW);
-	else
-		digitalWrite(WATER_COOLER, HIGH);
+		if (temperature_c < waterCoolerStartTemperature) // Default temperature is 60C
+			digitalWrite(WATER_COOLER, LOW);
+		else
+			digitalWrite(WATER_COOLER, HIGH);
 
-	if (temperature_c < airCoolerStartTemperature) // Default temperature is 80C
-		digitalWrite(AIR_COOLER, LOW);
-	else
-		digitalWrite(AIR_COOLER, HIGH);
+		if (temperature_c < airCoolerStartTemperature) // Default temperature is 80C
+			digitalWrite(AIR_COOLER, LOW);
+		else
+			digitalWrite(AIR_COOLER, HIGH);
 
-	if (temperature_c < 80) {
-		if (!wasGarbageDisposalExecuted) {
-			digitalWrite(GARBAGE_DISPOSAL, HIGH);
-			if (!garbageDisposalMadeTimeSnapshot) {
-				garbageDisposalTimeSnapshot = millis();
-				garbageDisposalMadeTimeSnapshot = true;
-			}
+		if (temperature_c < 80) {
+			if (!wasGarbageDisposalExecuted) {
+				digitalWrite(GARBAGE_DISPOSAL, HIGH);
+				if (!garbageDisposalMadeTimeSnapshot) {
+					garbageDisposalTimeSnapshot = millis();
+					garbageDisposalMadeTimeSnapshot = true;
+				}
 
-			if (millis() - garbageDisposalTimeSnapshot >= barrelAndGarbageDisposalStopExecute) {
-				digitalWrite(GARBAGE_DISPOSAL, LOW);
-				wasGarbageDisposalExecuted = true;
-				garbageDisposalMadeTimeSnapshot = false;
+				if (millis() - garbageDisposalTimeSnapshot >= barrelAndGarbageDisposalStopExecute) {
+					digitalWrite(GARBAGE_DISPOSAL, LOW);
+					wasGarbageDisposalExecuted = true;
+					garbageDisposalMadeTimeSnapshot = false;
+				}
 			}
 		}
-	}
 
-	if (temperature_c >= toBarrelDisposalStartTemperature) { // Default temperature is 80C
-		if (!wasBarrelDisposalExecuted) {
-			if (DEBUG)
-				Serial.println("Executing BARREL disposal");
-			digitalWrite(BARREL_DISPOSAL, HIGH);
-			if (!barrelDisposalMadeTimeSnapshot) {
-				barrelDisposalTimeSnapshot = millis();
-				barrelDisposalMadeTimeSnapshot = true;
-			}
+		if (temperature_c >= toBarrelDisposalStartTemperature) { // Default temperature is 80C
+			if (!wasBarrelDisposalExecuted) {
+				if (DEBUG)
+					Serial.println("Executing BARREL disposal");
+				digitalWrite(BARREL_DISPOSAL, HIGH);
+				if (!barrelDisposalMadeTimeSnapshot) {
+					barrelDisposalTimeSnapshot = millis();
+					barrelDisposalMadeTimeSnapshot = true;
+				}
 
-			if (millis() - barrelDisposalTimeSnapshot >= barrelAndGarbageDisposalStopExecute) {
-				digitalWrite(BARREL_DISPOSAL, LOW);
-				wasBarrelDisposalExecuted = true;
-				barrelDisposalMadeTimeSnapshot = false;
+				if (millis() - barrelDisposalTimeSnapshot >= barrelAndGarbageDisposalStopExecute) {
+					digitalWrite(BARREL_DISPOSAL, LOW);
+					wasBarrelDisposalExecuted = true;
+					barrelDisposalMadeTimeSnapshot = false;
+				}
 			}
 		}
 	}
@@ -296,19 +304,31 @@ void doDistilleryJob() {
 	}*/
 }
 
+//Set time to "delay" a publish message
+unsigned long previousGetTemp = 0;
+const long getTempInterval = 2000; // interval at which to send message (milliseconds)
+
 /**
  * Collect data from sensors
  */
 void getDataFromSensor() {
-	temperature_c = getTempFromMAX31855(); // Get temperature from MAX chip
-	if (temperature_c == -9999) { // In case there was an error with the chip MAX returns -9999
-		if (DEBUG)
-			Serial.println("Failed to read temperature from MAX31855k sensor.");
-		return;
-	}
-	if (DEBUG) {
-		Serial.print("Temperature is (C): ");
-		Serial.println(temperature_c);
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousGetTemp >= getTempInterval) {
+		previousGetTemp = currentMillis;
+		temperature_c = getTempFromMAX31855(); // Get temperature from MAX chip
+
+		if (temperature_c == -9999) { // In case there was an error with the chip MAX returns -9999
+			if (DEBUG)
+				Serial.println("Failed to read temperature from MAX31855k sensor.");
+			temperatureError = true;
+			return;
+		}
+		temperatureError = false;
+
+		if (DEBUG) {
+			Serial.print("Temperature is (C): ");
+			Serial.println(temperature_c);
+		}
 	}
 
 	if (isErrorOccurred)
