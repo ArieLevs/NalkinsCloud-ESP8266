@@ -8,6 +8,10 @@
 
 #include "DHT.h"
 
+#define DEVICE_ID "test_dht_device_id"
+#define DEVICE_TYPE "dht"
+#define CHIP_TYPE "ESP8266"
+
 //Set DHT type and input pin
 #define DHT_TYPE 	DHT22	// Set type of used DHT type
 #define DHT_PIN 	4 		// GPIO4 -> D2
@@ -118,9 +122,9 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
-	deviceType = "dht"; // The devices type definition
-	deviceId = "test_dht_device_id"; // The devices unique id
-	chipType = "ESP8266"; // The devices chip type
+	deviceType = DEVICE_TYPE; // The devices type definition
+	deviceId = DEVICE_ID; // The devices unique id
+	chipType = CHIP_TYPE; // The devices chip type
 
 	dht.begin(); // initialize temperature sensor
 
