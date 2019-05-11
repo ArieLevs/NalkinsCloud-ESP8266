@@ -42,10 +42,6 @@ const char PAGE_GeneralSettings[] PROGMEM = R"=====(
 <form action="generalSaved" method="post">
 <table border="0"  cellspacing="0" cellpadding="3" style="width:310px" >
 <tr>
-  <td align="right">Customer Username</td>
-  <td><input type="text" id="username" name="username" value=""></td>
-</tr>
-<tr>
   <td align="right">Device Password</td>
   <td><input type="text" id="devicepassword" name="devicepassword" value=""></td>
 </tr>
@@ -68,6 +64,10 @@ const char PAGE_GeneralSettings[] PROGMEM = R"=====(
 <tr>
   <td align="right">Device Id</td>
   <td><input type="text" id="deviceid" name="deviceid" value=""></td>
+</tr>
+<tr>
+  <td align="right">Device Type</td>
+  <td><input type="text" id="deviceType" name="deviceType" value=""></td>
 </tr>
 </table>
 

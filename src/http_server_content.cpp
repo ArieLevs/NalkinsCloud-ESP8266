@@ -23,6 +23,7 @@ void webServerGetGeneralConfigurationValues() {
 	values += "version|" + versionNum + "|input\n";
 	values += "model|" + chipType + "|input\n";
 	values += "deviceid|" + deviceId + "|input\n";
+	values += "deviceType|" + deviceType + "|input\n";
 	values += "devicepassword|" + configs.devicePassword + "|input\n";
 	server.send(200, "text/plain", values.c_str());
 	Serial.println(__FUNCTION__);
