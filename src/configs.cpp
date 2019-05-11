@@ -21,7 +21,7 @@ String DNSName;
 String versionNum;
 
 void initConfigs() {
-	bool isSslEncrypted = true;
+	isSslEncrypted = true;
 	isConfigurationMode = true;
 	// MQTT server configurations
 	QOS = 1;
