@@ -8,10 +8,6 @@
 
 #include "Adafruit_MAX31855.h"
 
-#define DEVICE_ID "test_distillery_device_id"
-#define DEVICE_TYPE "distillery"
-#define CHIP_TYPE "ESP8266"
-
 #define MAIN_HEATER      1  // GPIO01 -> TX, Main SSR IO pin
 #define WATER_COOLER     3  // GPIO03 -> RX, Watter Cooler SSR IO pin
 #define AIR_COOLER       16 // GPIO16 -> D0, Air Cooler SSR IO pin
@@ -379,10 +375,6 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
-	deviceType = DEVICE_TYPE; // The devices type definition
-	deviceId = DEVICE_ID; // The devices unique id
-	chipType = CHIP_TYPE; // The devices chip type
-
 	// Read temperature configurations
 	mainHeaterStartTemperature = readIntFromEEPROM(MAIN_HEATER_TEMP_ADDR);
 	waterCoolerStartTemperature = readIntFromEEPROM(WATER_COOLER_TEMP_ADDR);

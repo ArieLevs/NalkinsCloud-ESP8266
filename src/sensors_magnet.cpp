@@ -7,10 +7,6 @@
 #include "mqtt_client.h"
 #include "passive_infrared_sensor.h"
 
-#define DEVICE_ID "test_magnet_simulator"
-#define DEVICE_TYPE "magnet"
-#define CHIP_TYPE "ESP8266"
-
 // Bits	300 reserved for magnet sensor data
 #define IS_TRIGGERED_ADDR 300
 
@@ -133,9 +129,9 @@ void getSensorsInformation() {
 void initSensor() {
 	motionSensor = new PIR(PIR_INPUT_PIN);
 
-	deviceType = DEVICE_TYPE; // The devices type definition
-	deviceId = DEVICE_ID; // The devices unique id
-	chipType = CHIP_TYPE; // The devices chip type
+	deviceType = "magnet"; // The devices type definition
+	deviceId = "test_magnet_simulator"; // The devices unique id
+	chipType = "ESP8266"; // The devices chip type
 
 	// Set some non 0 or 1 value on init, so message will be published on start
 	lastMagnetState = 2;

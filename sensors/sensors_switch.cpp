@@ -6,10 +6,6 @@
 #include "functions.h"
 #include "mqtt_client.h"
 
-#define DEVICE_ID "test_switch_device_id"
-#define DEVICE_TYPE "switch"
-#define CHIP_TYPE "ESP8266"
-
 #define SWITCH_IN 4  // GPIO4 -> D2
 #define SWITCH_OUT 0 // GPIO0 -> D3
 
@@ -103,9 +99,9 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
-	deviceType = DEVICE_TYPE; // The devices type definition
-	deviceId = DEVICE_ID; // The devices unique id
-	chipType = CHIP_TYPE; // The devices chip type
+	deviceType = "switch"; // The devices type definition
+	deviceId = "test_switch_device_id"; // The devices unique id
+	chipType = "ESP8266"; // The devices chip type
 
 	lastSwitchStatePublish = digitalRead(SWITCH_IN);
 	lastSwitchState = digitalRead(SWITCH_IN);
