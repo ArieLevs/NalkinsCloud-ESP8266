@@ -138,6 +138,7 @@ const char PAGE_Information[] PROGMEM = R"=====(
 <tr><td align="right">Fingerprint :</td><td><span id="fingerprint"></span></td></tr>
 
 <tr><td colspan="2"></span></td></tr>
+<strong>Encrypted Connection:</strong><div id="encryptedconnection">N/A</div>
 <strong>SSL Connection:</strong><div id="sslconnection">N/A</div>
 <tr><td colspan="2" align="center"><a href="javascript:GetMQTTState()" class="btn btn--m btn--blue">Refresh</a></td></tr>
 </table>
