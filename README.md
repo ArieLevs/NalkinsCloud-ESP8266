@@ -129,3 +129,22 @@ Once the device is connected to a Wi-Fi network, and a MQTT broker, it will star
 #### General workflow of main() function
 
 ![](docs/ESP8266_Main_Function_draw.io.png)
+
+Creating a bit map array
+------------------------
+* can be later used for ssd1306 oled display
+
+for images of **64x48 pixels**,
+
+select picture in the side of max 64x48,
+convert the image to bit map array using http://javl.github.io/image2cpp/,  
+select `code output format` to `Arduino code`, save out put part of the code.
+
+Use generated bit map as
+```
+// top left corner X, top left corner Y,
+// byte array of bitmap,
+// width of bitmap (pixels), height of bitmap (pixels), Color
+display.drawBitmap(0, 0, myBitmap, 64, 48, WHITE);
+display.display();
+```

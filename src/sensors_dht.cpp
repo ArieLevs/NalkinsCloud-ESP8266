@@ -8,6 +8,25 @@
 
 #include "DHT.h"
 
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+// SCL GPIO5
+// SDA GPIO4
+#define OLED_RESET 0 // GPIO0
+Adafruit_SSD1306 display(OLED_RESET);
+
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+
+
+#define LOGO16_GLCD_HEIGHT 16
+#define LOGO16_GLCD_WIDTH  16
+
 //Set DHT type and input pin
 #define DHT_TYPE 	DHT22	// Set type of used DHT type
 #define DHT_PIN 	4 		// GPIO4 -> D2

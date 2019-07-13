@@ -14,6 +14,10 @@
 #define GARBAGE_DISPOSAL 12 // GPIO12 -> D6, To Garbage SSR IO pin
 #define BARREL_DISPOSAL  15 // GPIO15 -> D8, To Barrel SSR IO pin
 
+#define DEVICE_TYPE	"distillery"; // The devices type definition
+#define DEVICE_ID	"distillery_device_id"; // The devices unique id
+#define CHIP_TYPE	"ESP8266"; // The devices chip type
+
 
 // Bits	300-306 reserved for distillery sensor data
 // - bit 301		hold if automation job executed
@@ -375,6 +379,10 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
+	deviceType = DEVICE_TYPE; // The devices type definition
+	deviceId = DEVICE_ID; // The devices unique id
+	chipType = CHIP_TYPE; // The devices chip type
+
 	// Read temperature configurations
 	mainHeaterStartTemperature = readIntFromEEPROM(MAIN_HEATER_TEMP_ADDR);
 	waterCoolerStartTemperature = readIntFromEEPROM(WATER_COOLER_TEMP_ADDR);
