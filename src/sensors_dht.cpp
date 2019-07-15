@@ -5,39 +5,25 @@
 #include "configs.h"
 #include "functions.h"
 #include "mqtt_client.h"
+#include "oled_display.h"
 
 #include "DHT.h"
 
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-
-// SCL GPIO5
-// SDA GPIO4
-#define OLED_RESET 0 // GPIO0
-Adafruit_SSD1306 display(OLED_RESET);
-
-#define NUMFLAKES 10
-#define XPOS 0
-#define YPOS 1
-#define DELTAY 2
-
-
-#define LOGO16_GLCD_HEIGHT 16
-#define LOGO16_GLCD_WIDTH  16
-
 //Set DHT type and input pin
 #define DHT_TYPE 	DHT22	// Set type of used DHT type
-#define DHT_PIN 	4 		// GPIO4 -> D2
+#define DHT_PIN 	0 		// GPIO0 -> D3
 
 float temperature_c, humidity;
 
 DHT dht(DHT_PIN, DHT_TYPE, 11); // 11 works fine for ESP8266
 
+Oled64x48Display *oledDisplay = nullptr;
+
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
 const long publishInterval = 120000; // interval at which to send message (milliseconds)
+unsigned long previousTempDisplay = 59999;  // set to 59999 so temp print will occur on first iteration
+const long tempDisplayInterval = 60000; // interval at which to send message (milliseconds)
 
 /**
  * Publish all data to the mqtt broker
@@ -121,6 +107,13 @@ void getDataFromSensor() {
 		Serial.print("Current humidity: ");
 		Serial.println(humidity);
 	}
+
+	unsigned long currentMillis = millis();
+	if (currentMillis - previousTempDisplay >= tempDisplayInterval) {
+		previousTempDisplay = currentMillis;
+
+		oledDisplay->displayTemp(temperature_c, humidity);
+	}
 }
 
 
@@ -137,6 +130,10 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
+	oledDisplay = new Oled64x48Display(1, WHITE);
+	oledDisplay->initDisplay();
+	oledDisplay->displayLogo();
+
 	deviceType = "dht"; // The devices type definition
 	deviceId = "test_dht_device_id"; // The devices unique id
 	chipType = "ESP8266"; // The devices chip type
