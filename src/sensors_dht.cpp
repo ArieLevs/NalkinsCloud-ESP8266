@@ -13,6 +13,8 @@
 #define DHT_TYPE 	DHT22	// Set type of used DHT type
 #define DHT_PIN 	0 		// GPIO0 -> D3
 
+#define deepSleepDuration 300 // Seconds
+
 float temperature_c, humidity;
 
 DHT dht(DHT_PIN, DHT_TYPE, 11); // 11 works fine for ESP8266
@@ -55,6 +57,8 @@ void publishDataToServer() {
 		} else
 			dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
 		publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
+
+		ESP.deepSleep(deepSleepDuration * 1000000);
 	}
 }
 
