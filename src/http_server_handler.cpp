@@ -54,16 +54,20 @@ void handleReturnId() {
 	server.on("/return_id", HTTP_POST, []() {
 		if (DEBUG)
 			Serial.println("JSON return_id initiated");
-		StaticJsonBuffer<256> newBuffer;
+		StaticJsonDocument<256> newBuffer;
 		// Get the request JSON body
-		JsonObject &jsonmsg = newBuffer.parseObject(server.arg("plain"));
-		jsonmsg.prettyPrintTo(wifiClientSecure);
+
+		DeserializationError error = deserializeJson(newBuffer, server.arg("plain"));
+
+//		JsonObject &jsonmsg = newBuffer.parseObject(server.arg("plain"));
+//		jsonmsg.prettyPrintTo(wifiClientSecure);
+//		serializeJsonPretty(server.arg("plain"), wifiClientSecure);
 		if (DEBUG) {
 			Serial.println("Message received:");
 			Serial.println(server.arg("plain"));
 		}
 		// If message parse failed
-		if (!jsonmsg.success()) {
+		if (error) {
 			if (DEBUG)
 				Serial.println("Parsing failed");
 			server.send(200, "text/plain",
@@ -90,27 +94,29 @@ void handleAutoConfig() {
 	server.on("/autoconfig", HTTP_POST, []() {
 		if (DEBUG)
 			Serial.println("/autoconfig was accessed");
-		StaticJsonBuffer<1024> newBuffer;
+		StaticJsonDocument<1024> newBuffer;
 		// Get the request JSON body
-		JsonObject &jsonmsg = newBuffer.parseObject(server.arg("plain"));
-		jsonmsg.prettyPrintTo(wifiClientSecure);
+		DeserializationError error = deserializeJson(newBuffer, server.arg("plain"));
+//		JsonObject &jsonmsg = newBuffer.parseObject(server.arg("plain"));
+//		jsonmsg.prettyPrintTo(wifiClientSecure);
+//		serializeJsonPretty(server.arg("plain"), wifiClientSecure);
 		if (DEBUG) {
 			Serial.println("Message received:");
 			Serial.println(server.arg("plain"));
 		}
 		// If message parse failed
-		if (!jsonmsg.success()) {
+		if (error) {
 			if (DEBUG)
 				Serial.println("Parsing failed");
 			server.send(200, "text/plain",
 						"{\"status\":\"failed\",\"message\":\"message contains error(s), check json syntax\"}");
 		} else {
 			// Get JSON to global variables
-			configs.wifiSsid = (const char *) jsonmsg["ssid"]; // Get SSID from JSON
-			configs.wifiPassword = (const char *) jsonmsg["wifi_pass"];
-			configs.devicePassword = (const char *) jsonmsg["device_pass"];
-			configs.mqttServer = (const char *) jsonmsg["mqtt_server"];
-			configs.mqttPort = (uint8_t) jsonmsg["mqtt_port"];
+			configs.wifiSsid = (const char *) newBuffer["ssid"]; // Get SSID from JSON
+			configs.wifiPassword = (const char *) newBuffer["wifi_pass"];
+			configs.devicePassword = (const char *) newBuffer["device_pass"];
+			configs.mqttServer = (const char *) newBuffer["mqtt_server"];
+			configs.mqttPort = (uint8_t) newBuffer["mqtt_port"];
 			//configs.mqttFingerprint = (const char*)jsonmsg["server_fingerprint"];
 
 			if (DEBUG) {
