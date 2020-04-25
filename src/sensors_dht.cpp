@@ -24,8 +24,36 @@ Oled64x48Display *oledDisplay = nullptr;
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
 const long publishInterval = 120000; // interval at which to send message (milliseconds)
-unsigned long previousTempDisplay = 59999;  // set to 59999 so temp print will occur on first iteration
-const long tempDisplayInterval = 60000; // interval at which to send message (milliseconds)
+
+unsigned long previousTempDisplay = 999999; // set to 999999 so temp print will occur on first iteration
+const long tempDisplayInterval = 100000; // interval at which to display temperature (milliseconds)
+
+unsigned long previousServerDataDisplay = 14999;
+const long serverDataDisplayInterval = 15000;
+
+unsigned long previousBatteryDisplay = 4999;
+const long batteryDisplayInterval = 5000;
+
+/**
+ * displayCycle is the time frame of when we "reset" shown things,
+ * and its value is the sum of all displayed components.
+ * display cycle is needed for calculating how much display time each component will get
+ * for example:
+ * 	0 seconds					  	  100s	   	   	  115s		 120 seconds
+ * 		|-------------------------------|---------------|-----------|
+ * 		|								|				|			|
+ * 		|								|				|-----------|
+ * 		|-------------------------------|				|  display
+ * 			 display temperature		|				|  battery
+ *										|				|  states
+ *										|---------------|
+ * 									 	    display
+ * 									 	  server data
+ *
+ * NOTE!!! components must be in that orders, as a calculation in displayData function takes this into account
+ */
+const long displayCycleInterval = tempDisplayInterval + serverDataDisplayInterval + batteryDisplayInterval;
+unsigned long previousDisplayCycleInterval = 0;
 
 /**
  * Publish all data to the mqtt broker
@@ -113,10 +141,53 @@ void getDataFromSensor() {
 	}
 
 	unsigned long currentMillis = millis();
-	if (currentMillis - previousTempDisplay >= tempDisplayInterval) {
-		previousTempDisplay = currentMillis;
+	/**
+	 * case when we need to reset cycle
+	 * 													previousDisplayCycleInterval
+	 * 																 |
+	 * 																 |
+	 *  	0s						  	  100s	   	   	  115s		 |
+	 * 		|-------------------------------|---------------|--------*--|--* <- currentMillis
+	 * 		|								|				|			|
+	 * 		|								|				|-----------*
+	 * 		|-------------------------------|				|			|
+	 * 			display temperature			|				|			|
+	 *										|				|	 displayCycleInterval
+	 *										|---------------|
+	 * 									 	    display
+	 * 									 	  server data
+	 */
+	if (currentMillis - previousDisplayCycleInterval >= displayCycleInterval) {
+		// previousDisplayCycleInterval will be used as the "head" of the display cycle (point 0s on graph)
+		previousDisplayCycleInterval = currentMillis;
+	} else { // current time frame is somewhere in between 0 ("head") to displayCycleInterval
 
-		oledDisplay->displayTemp(temperature_c, humidity);
+		// calculate time passed since 0 point (head)
+		unsigned long currentCycleTime = currentMillis - previousDisplayCycleInterval;
+		
+		if (currentCycleTime < tempDisplayInterval) {
+			/**
+			 * current time is some where in the tempDisplayInterval, for example
+			 *
+			 * previousDisplayCycleInterval
+			 *			  |
+			 * 			  |	currentMillis	   tempDisplayInterval
+			 * 			  |		  |						|
+			 *	   		  |  	  | 			  	  100s	   	   	  115s		 120 seconds
+			 * head 0s->|-*-------*---------------------|---------------|-----------|
+			 * 			|		  						|				|			|
+			 *	 		|								|				|-----------|
+			 * 			|-------------------------------|				|
+			 * 				display temperature			|				|
+			 *											|				|
+			 *											|---------------|
+			 */
+			oledDisplay->displayTemp(temperature_c, humidity);
+		} else if (currentCycleTime < (tempDisplayInterval + previousServerDataDisplay)) {
+			Serial.print("Display server data");
+		} else { // display last component in order
+			Serial.print("Display battery data");
+		}
 	}
 }
 
