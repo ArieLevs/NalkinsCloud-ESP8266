@@ -51,6 +51,7 @@ public:
 	void displayTemp(float temp, float humidity);
 	void displayServerData(String& host, String& port);
 	void displayBatteryData(String& battPercentage);
+	void displayWifiSSID(String& ssid);
 	void initDisplay();
 
 private:

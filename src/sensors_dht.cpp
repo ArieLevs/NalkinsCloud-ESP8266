@@ -31,7 +31,9 @@ const long tempDisplayInterval = 100000; // interval at which to display tempera
 unsigned long previousServerDataDisplay = 14999;
 const long serverDataDisplayInterval = 15000;
 
-unsigned long previousBatteryDisplay = 4999;
+unsigned long previousSsidDDisplay = 4999;
+const long ssidDisplayInterval = 5000;
+
 const long batteryDisplayInterval = 5000;
 
 /**
@@ -39,20 +41,20 @@ const long batteryDisplayInterval = 5000;
  * and its value is the sum of all displayed components.
  * display cycle is needed for calculating how much display time each component will get
  * for example:
- * 	0 seconds					  	  100s	   	   	  115s		 120 seconds
- * 		|-------------------------------|---------------|-----------|
- * 		|								|				|			|
- * 		|								|				|-----------|
- * 		|-------------------------------|				|  display
- * 			 display temperature		|				|  battery
- *										|				|  states
+ * 	0 seconds					  	  100s	   	   	  115s		  120s	    125seconds
+ * 		|-------------------------------|---------------|-----------|-----------|
+ * 		|								|				|			|			|
+ * 		|								|				|-----------|-----------|
+ * 		|-------------------------------|				|  display  	display
+ * 			 display temperature		|				|  	WIFI		battery
+ *										|				|	SSID		states
  *										|---------------|
  * 									 	    display
  * 									 	  server data
  *
  * NOTE!!! components must be in that orders, as a calculation in displayData function takes this into account
  */
-const long displayCycleInterval = tempDisplayInterval + serverDataDisplayInterval + batteryDisplayInterval;
+const long displayCycleInterval = tempDisplayInterval + serverDataDisplayInterval + ssidDisplayInterval + batteryDisplayInterval;
 unsigned long previousDisplayCycleInterval = 0;
 
 /**
@@ -185,6 +187,8 @@ void getDataFromSensor() {
 		} else if (currentCycleTime < (tempDisplayInterval + previousServerDataDisplay)) {
 			String portString = String(configs.mqttPort);
 			oledDisplay->displayServerData(configs.mqttServer, portString);
+		} else if (currentCycleTime < (tempDisplayInterval + previousServerDataDisplay + previousSsidDDisplay)) {
+			oledDisplay->displayWifiSSID(configs.wifiSsid);
 		} else { // display last component in order
 			// TODO implement real battery voltage calculation
 			String a = "85% (FAKE)";

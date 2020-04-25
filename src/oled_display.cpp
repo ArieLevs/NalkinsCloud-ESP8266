@@ -58,6 +58,22 @@ void Oled64x48Display::displayServerData(String& host, String& port) {
 	display.display();
 }
 
+/**
+ * print wifi SSID name to display in 2 separate lines
+ * @param ssid ssid to print
+ */
+void Oled64x48Display::displayWifiSSID(String& ssid) {
+	display.clearDisplay();
+	display.setCursor(0,0);
+	display.println("WiFi used:");
+	display.println(ssid);
+	display.display();
+}
+
+/**
+ * print percentage of battery left to display in 2 separate lines
+ * @param battPercentage
+ */
 void Oled64x48Display::displayBatteryData(String& battPercentage) {
 	display.clearDisplay();
 	display.setCursor(0,0);
