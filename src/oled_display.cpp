@@ -46,6 +46,27 @@ void Oled64x48Display::displayTemp(float temp, float humidity) {
 }
 
 /**
+ * print mqtt broker host and port to display in 2 separate lines
+ * @param host host to print
+ * @param port port to print
+ */
+void Oled64x48Display::displayServerData(String& host, String& port) {
+	display.clearDisplay();
+	display.setCursor(0,0);
+	display.println("MQTT Host:");
+	display.println(host + ":" + port);
+	display.display();
+}
+
+void Oled64x48Display::displayBatteryData(String& battPercentage) {
+	display.clearDisplay();
+	display.setCursor(0,0);
+	display.println("Batt left:");
+	display.println(battPercentage);
+	display.display();
+}
+
+/**
  * init ith the I2C addr 0x3C (for 64x48),
  * set relevant text size and color
  */

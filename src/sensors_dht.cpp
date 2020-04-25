@@ -164,7 +164,6 @@ void getDataFromSensor() {
 
 		// calculate time passed since 0 point (head)
 		unsigned long currentCycleTime = currentMillis - previousDisplayCycleInterval;
-		
 		if (currentCycleTime < tempDisplayInterval) {
 			/**
 			 * current time is some where in the tempDisplayInterval, for example
@@ -184,9 +183,12 @@ void getDataFromSensor() {
 			 */
 			oledDisplay->displayTemp(temperature_c, humidity);
 		} else if (currentCycleTime < (tempDisplayInterval + previousServerDataDisplay)) {
-			Serial.print("Display server data");
+			String portString = String(configs.mqttPort);
+			oledDisplay->displayServerData(configs.mqttServer, portString);
 		} else { // display last component in order
-			Serial.print("Display battery data");
+			// TODO implement real battery voltage calculation
+			String a = "85% (FAKE)";
+			oledDisplay->displayBatteryData(a);
 		}
 	}
 }
