@@ -1,31 +1,35 @@
 NalkinsCloud-ESP8266
 ====================
 
-This is an Arduino project, written in C++, to handle ESP8266 chip  
-The Project will allow send/receive info from/to sensors, forward it to a MQTT broker, and subscribe to topics
+This is an IOT project, written in C++, running on the [ESP8266](https://en.wikipedia.org/wiki/ESP8266) microchip,  
+It can also be used on Arduino boards.  
+The Project will allow send/receive info from/to sensors, forward it to a MQTT broker.
 
 Setting up project on CLion and PlatformIO
 ------------------------------------------
+Make sure to use Python 3.5+, detailed install instructions [here](https://docs.platformio.org/en/latest/core/installation.html#installation)
 
-As [documented](https://docs.platformio.org/en/latest/ide/clion.html), Python2.7 is requiered,  
-Below instructions are for MacOS:
-
-Install PlatformIO:  
-`pip2.7 install -U platformio`
+Install PlatformIO:
+```shell script
+python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+```
 
 Install Shell Commands:
-```bash
+```shell script
 # create system-wide symlinks
 ln -s ~/.platformio/penv/bin/platformio /usr/local/bin/platformio
 ln -s ~/.platformio/penv/bin/pio /usr/local/bin/pio
 ln -s ~/.platformio/penv/bin/piodebuggdb /usr/local/bin/piodebuggdb
 ```
 
-Init new project using the [esp8266-12 board](https://docs.platformio.org/en/latest/boards/espressif8266/esp12e.html):
+Prepare [Clion IDE with PlatformIO](https://docs.platformio.org/en/latest/integration/ide/clion.html#ide-clion),
 
-```bash
+Init new project using the [esp8266-12 board](https://docs.platformio.org/en/latest/boards/espressif8266/esp12e.html):
+```shell script
 platformio init --ide clion --board esp12e
 ```
+
+Build and Upload project as [instructed here](https://docs.platformio.org/en/latest/integration/ide/clion.html#build-upload)
 
 Getting started
 ---------------
