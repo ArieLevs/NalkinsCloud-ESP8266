@@ -49,6 +49,7 @@ public:
 
 	void displayLogo();
 	void displayTemp(float temp, float humidity);
+    void displayWeight(long weight);
 	void displayServerData(String& host, String& port);
 	void displayBatteryData(String& battPercentage);
 	void displayWifiSSID(String& ssid);

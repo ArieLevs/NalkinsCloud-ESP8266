@@ -46,6 +46,18 @@ void Oled64x48Display::displayTemp(float temp, float humidity) {
 }
 
 /**
+ * print weight to display
+ * @param weight to print
+ */
+void Oled64x48Display::displayWeight(long weight) {
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println("Weight: ");
+    display.println(weight);
+    display.display();
+}
+
+/**
  * print mqtt broker host and port to display in 2 separate lines
  * @param host host to print
  * @param port port to print
