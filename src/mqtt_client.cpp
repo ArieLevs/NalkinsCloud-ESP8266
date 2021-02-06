@@ -9,11 +9,15 @@
 PubSubClient mqttClient;
 
 void initMqttClient() {
+    if (DEBUG) {
+        Serial.print("Initializing mqtt client, isSslEncrypted status is: ");
+        Serial.println(isSslEncrypted);
+    }
 	wifiClientSecure = WiFiClientSecure();
 	if (isSslEncrypted)
-		wifiClientSecure.setFingerprint(fingerprint);
+        wifiClientSecure.setFingerprint(fingerprint);
 	else
-		wifiClientSecure.setInsecure();
+        wifiClientSecure.setInsecure();
 	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure);
 	delay(10);
 }
