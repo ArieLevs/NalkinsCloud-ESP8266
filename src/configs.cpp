@@ -21,17 +21,17 @@ String DNSName;
 String versionNum;
 
 void initConfigs() {
-	bool isSslEncrypted = true;
+	isSslEncrypted = false;
 	isConfigurationMode = true;
 	// MQTT server configurations
 	QOS = 1;
 	retained = true; //Set retained messages to true
 	notRetained = false; //Set retained messages to false
 	// DNS name to access device on STA mode
-	DNSName = "efs8266.local";
+	DNSName = "esp8266.local";
 	versionNum = "1.0.0.0";
-	strConfigs configs = {};
-};
+	configs = {};
+}
 
 bool getConfigurationMode() {
 	return isConfigurationMode;
