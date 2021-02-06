@@ -77,8 +77,6 @@ void publishDataToServer() {
 		} else
 			dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
 		publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
-
-		ESP.deepSleep(deepSleepDuration * 1000000);
 	}
 }
 
