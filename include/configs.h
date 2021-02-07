@@ -10,8 +10,6 @@
 
 #include "Arduino.h"
 
-#define DEBUG 1 //Set serial prints
-
 #define SSID_START_ADDR 0
 #define WIFI_PASS_START_ADDR 32
 #define MQTT_SERVER_START_ADDR 64
@@ -27,6 +25,7 @@
 #define ACCESS_POINT_SSID "ESP8266"
 #define ACCESS_POINT_PASSWORD "nalkinscloud"
 
+extern bool DEBUG; //Set serial prints
 
 extern bool isSslEncrypted;
 extern bool isConfigurationMode; // Runtime var to store work mode status
