@@ -48,11 +48,8 @@ public:
 	Oled64x48Display(uint8_t textSize, uint8_t textColor);
 
 	void displayLogo();
-	void displayTemp(float temp, float humidity);
-    void displayWeight(long weight);
-	void displayServerData(String& host, String& port);
-	void displayBatteryData(String& battPercentage);
-	void displayWifiSSID(String& ssid);
+    void displayText(String& content);
+    void displaySensorData(String& content);
 	void initDisplay();
 
 private:

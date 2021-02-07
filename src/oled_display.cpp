@@ -4,10 +4,38 @@
 
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 #include "oled_display.h"
+#include "configs.h"
+#include "wifi_handler.h"
+#include "mqtt_client.h"
+
+// time durations to display information
+long dataInterval = 60000;
+long serverInterval = 10000;
+long ssidInterval = 5000;
+long batteryInterval = 5000;
+/**
+ * cycleInterval is the time frame of when we "reset" shown info,
+ * and its value is the sum of all displayed components.
+ * display cycle is needed for calculating how much display time each component will get
+ * for example:
+ * 	0 seconds					  	   60s	   	   	   70s		   75s	     80 seconds
+ * 		|-------------------------------|---------------|-----------|-----------|
+ * 		|								|				|			|			|
+ * 		|								|				|-----------|-----------|
+ * 		|-------------------------------|				|  display  	display
+ * 			 display data		        |				|  	WIFI		battery
+ *										|				|	SSID		states
+ *										|---------------|
+ * 									 	    display
+ * 									 	  server data
+ *
+ * NOTE!!! components must be in that orders, as a calculation in displaySensorData function takes this into account
+ */
+long cycleInterval = dataInterval + serverInterval + ssidInterval + batteryInterval;
+unsigned long previousCycleInterval = 0;
 
 
 /**
@@ -30,68 +58,75 @@ void Oled64x48Display::displayLogo() {
 }
 
 /**
- * print temperature and humidity to display in 4 separate lines
- * @param temp temperature to print
- * @param humidity humidity to print
+ * print content starting at display location (0, 0).
+ * @param content
  */
-void Oled64x48Display::displayTemp(float temp, float humidity) {
-	display.clearDisplay();
-	display.setCursor(0,0);
-	display.println("Temp (C): ");
-	display.println(temp);
-	display.setCursor(0,16);
-	display.println("Humidity: ");
-	display.println(humidity);
-	display.display();
+void Oled64x48Display::displaySensorData(String& content) {
+    unsigned long currentMillis = millis();
+    /**
+     * case when we need to reset cycle
+     * 													    previousCycleInterval
+     * 																 |
+     * 																 |
+     *  	0s						  	  100s	   	   	  115s		 |
+     * 		|-------------------------------|---------------|--------*--|--* <- currentMillis
+     * 		|								|				|			|
+     * 		|								|				|-----------*
+     * 		|-------------------------------|				|			|
+     * 			display content 			|				|			|
+     *										|				|	  cycleInterval
+     *										|---------------|
+     * 									 	    display
+     * 									 	  server data
+     */
+    if (currentMillis - previousCycleInterval >= cycleInterval) {
+        // previousCycleInterval will be used as the "head" of the display cycle (point 0s on graph)
+        previousCycleInterval = currentMillis;
+    } else { // current time frame is somewhere in between 0 ("head") to cycleInterval
+
+        // calculate time passed since 0 point (head)
+        unsigned long currentCycleTime = currentMillis - previousCycleInterval;
+        if (currentCycleTime < dataInterval) {
+            /**
+             * current time is somewhere in the dataInterval, for example
+             *
+             * previousCycleInterval
+             *			  |
+             * 			  |	currentMillis	        dataInterval
+             * 			  |		  |						|
+             *	   		  |  	  | 			  	  100s	   	   	  115s		 120 seconds
+             * head 0s->|-*-------*---------------------|---------------|-----------|
+             * 			|		  						|				|			|
+             *	 		|								|				|-----------|
+             * 			|-------------------------------|				|
+             * 				    display content 		|				|
+             *											|				|
+             *											|---------------|
+             */
+            displayText(content);
+        } else if (currentCycleTime < (dataInterval + serverInterval)) {
+            String broker = "MQTT connected: " + String(isClientConnectedToMQTTServer()) + "\nHost:\n" + String(configs.mqttServer) + ":" + String(configs.mqttPort);
+            displayText(broker);
+        } else if (currentCycleTime < (dataInterval + serverInterval + ssidInterval)) {
+            String wifi =  "WiFi\nConnected: " + String(isWifiConnected()) + "\nssid:\n" +  String(configs.wifiSsid);
+            displayText(wifi);
+        } else { // display last component in order
+            // TODO implement real battery voltage calculation
+            String batt =  "Batt left:\n" +  String("85% (FAKE)");
+            displayText(batt);
+        }
+    }
 }
 
 /**
- * print weight to display
- * @param weight to print
+ * print content starting at display location (0, 0).
+ * @param content
  */
-void Oled64x48Display::displayWeight(long weight) {
+void Oled64x48Display::displayText(String& content) {
     display.clearDisplay();
     display.setCursor(0,0);
-    display.println("Weight: ");
-    display.println(weight);
+    display.println(content);
     display.display();
-}
-
-/**
- * print mqtt broker host and port to display in 2 separate lines
- * @param host host to print
- * @param port port to print
- */
-void Oled64x48Display::displayServerData(String& host, String& port) {
-	display.clearDisplay();
-	display.setCursor(0,0);
-	display.println("MQTT Host:");
-	display.println(host + ":" + port);
-	display.display();
-}
-
-/**
- * print wifi SSID name to display in 2 separate lines
- * @param ssid ssid to print
- */
-void Oled64x48Display::displayWifiSSID(String& ssid) {
-	display.clearDisplay();
-	display.setCursor(0,0);
-	display.println("WiFi used:");
-	display.println(ssid);
-	display.display();
-}
-
-/**
- * print percentage of battery left to display in 2 separate lines
- * @param battPercentage
- */
-void Oled64x48Display::displayBatteryData(String& battPercentage) {
-	display.clearDisplay();
-	display.setCursor(0,0);
-	display.println("Batt left:");
-	display.println(battPercentage);
-	display.display();
 }
 
 /**

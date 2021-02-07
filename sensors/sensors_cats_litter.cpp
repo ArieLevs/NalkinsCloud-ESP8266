@@ -25,38 +25,6 @@ Oled64x48Display *oledDisplay = nullptr;
 unsigned long previousPublish = 0;
 const long publishInterval = 120000; // interval at which to send message (milliseconds)
 
-unsigned long previousDataDisplay = 999999; // set to 999999 so sensor data print will occur on first iteration
-const long dataDisplayInterval = 100000; // interval at which to display sensor data (milliseconds)
-
-unsigned long previousServerDataDisplay = 14999;
-const long serverDataDisplayInterval = 15000;
-
-unsigned long previousSsidDDisplay = 4999;
-const long ssidDisplayInterval = 5000;
-
-const long batteryDisplayInterval = 5000;
-
-/**
- * displayCycle is the time frame of when we "reset" shown things,
- * and its value is the sum of all displayed components.
- * display cycle is needed for calculating how much display time each component will get
- * for example:
- * 	0 seconds					  	  100s	   	   	  115s		  120s	    125seconds
- * 		|-------------------------------|---------------|-----------|-----------|
- * 		|								|				|			|			|
- * 		|								|				|-----------|-----------|
- * 		|-------------------------------|				|  display  	display
- * 			 display sensor data		|				|  	WIFI		battery
- *										|				|	SSID		states
- *										|---------------|
- * 									 	    display
- * 									 	  server data
- *
- * NOTE!!! components must be in that orders, as a calculation in displayData function takes this into account
- */
-const long displayCycleInterval = dataDisplayInterval + serverDataDisplayInterval + ssidDisplayInterval + batteryDisplayInterval;
-unsigned long previousDisplayCycleInterval = 0;
-
 /**
  * Publish all data to the mqtt broker
  */
@@ -130,60 +98,8 @@ void getDataFromSensor() {
 		Serial.print("Current weight: ");
 		Serial.println(scale_read_value);
 	}
-
-	unsigned long currentMillis = millis();
-	/**
-	 * case when we need to reset cycle
-	 * 													previousDisplayCycleInterval
-	 * 																 |
-	 * 																 |
-	 *  	0s						  	  100s	   	   	  115s		 |
-	 * 		|-------------------------------|---------------|--------*--|--* <- currentMillis
-	 * 		|								|				|			|
-	 * 		|								|				|-----------*
-	 * 		|-------------------------------|				|			|
-	 * 			display sensor data			|				|			|
-	 *										|				|	 displayCycleInterval
-	 *										|---------------|
-	 * 									 	    display
-	 * 									 	  server data
-	 */
-	if (currentMillis - previousDisplayCycleInterval >= displayCycleInterval) {
-		// previousDisplayCycleInterval will be used as the "head" of the display cycle (point 0s on graph)
-		previousDisplayCycleInterval = currentMillis;
-	} else { // current time frame is somewhere in between 0 ("head") to displayCycleInterval
-
-		// calculate time passed since 0 point (head)
-		unsigned long currentCycleTime = currentMillis - previousDisplayCycleInterval;
-		if (currentCycleTime < dataDisplayInterval) {
-			/**
-			 * current time is some where in the tempDisplayInterval, for example
-			 *
-			 * previousDisplayCycleInterval
-			 *			  |
-			 * 			  |	currentMillis	   tempDisplayInterval
-			 * 			  |		  |						|
-			 *	   		  |  	  | 			  	  100s	   	   	  115s		 120 seconds
-			 * head 0s->|-*-------*---------------------|---------------|-----------|
-			 * 			|		  						|				|			|
-			 *	 		|								|				|-----------|
-			 * 			|-------------------------------|				|
-			 * 				display sensor data			|				|
-			 *											|				|
-			 *											|---------------|
-			 */
-			oledDisplay->displayWeight(scale_read_value);
-		} else if (currentCycleTime < (dataDisplayInterval + previousServerDataDisplay)) {
-			String portString = String(configs.mqttPort);
-			oledDisplay->displayServerData(configs.mqttServer, portString);
-		} else if (currentCycleTime < (dataDisplayInterval + previousServerDataDisplay + previousSsidDDisplay)) {
-			oledDisplay->displayWifiSSID(configs.wifiSsid);
-		} else { // display last component in order
-			// TODO implement real battery voltage calculation
-			String a = "85% (FAKE)";
-			oledDisplay->displayBatteryData(a);
-		}
-	}
+    String text = scale_read_value;
+    oledDisplay->displaySensorData(text);
 }
 
 

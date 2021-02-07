@@ -2,7 +2,6 @@
 #include "Arduino.h"
 
 #include "sensors.h"
-#include "configs.h"
 #include "functions.h"
 #include "mqtt_client.h"
 #include "oled_display.h"
@@ -24,38 +23,6 @@ Oled64x48Display *oledDisplay = nullptr;
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
 const long publishInterval = 120000; // interval at which to send message (milliseconds)
-
-unsigned long previousTempDisplay = 999999; // set to 999999 so temp print will occur on first iteration
-const long tempDisplayInterval = 100000; // interval at which to display temperature (milliseconds)
-
-unsigned long previousServerDataDisplay = 14999;
-const long serverDataDisplayInterval = 15000;
-
-unsigned long previousSsidDDisplay = 4999;
-const long ssidDisplayInterval = 5000;
-
-const long batteryDisplayInterval = 5000;
-
-/**
- * displayCycle is the time frame of when we "reset" shown things,
- * and its value is the sum of all displayed components.
- * display cycle is needed for calculating how much display time each component will get
- * for example:
- * 	0 seconds					  	  100s	   	   	  115s		  120s	    125seconds
- * 		|-------------------------------|---------------|-----------|-----------|
- * 		|								|				|			|			|
- * 		|								|				|-----------|-----------|
- * 		|-------------------------------|				|  display  	display
- * 			 display temperature		|				|  	WIFI		battery
- *										|				|	SSID		states
- *										|---------------|
- * 									 	    display
- * 									 	  server data
- *
- * NOTE!!! components must be in that orders, as a calculation in displayData function takes this into account
- */
-const long displayCycleInterval = tempDisplayInterval + serverDataDisplayInterval + ssidDisplayInterval + batteryDisplayInterval;
-unsigned long previousDisplayCycleInterval = 0;
 
 /**
  * Publish all data to the mqtt broker
@@ -134,65 +101,13 @@ void getDataFromSensor() {
 		if (DEBUG)
 			Serial.println("Failed to read humidity from DHT sensor!");
 	if (DEBUG) {
-		Serial.print("Current temperature C: ");
+		Serial.print("Temperature C: ");
 		Serial.println(temperature_c);
-		Serial.print("Current humidity: ");
+		Serial.print("Humidity: ");
 		Serial.println(humidity);
 	}
-
-	unsigned long currentMillis = millis();
-	/**
-	 * case when we need to reset cycle
-	 * 													previousDisplayCycleInterval
-	 * 																 |
-	 * 																 |
-	 *  	0s						  	  100s	   	   	  115s		 |
-	 * 		|-------------------------------|---------------|--------*--|--* <- currentMillis
-	 * 		|								|				|			|
-	 * 		|								|				|-----------*
-	 * 		|-------------------------------|				|			|
-	 * 			display temperature			|				|			|
-	 *										|				|	 displayCycleInterval
-	 *										|---------------|
-	 * 									 	    display
-	 * 									 	  server data
-	 */
-	if (currentMillis - previousDisplayCycleInterval >= displayCycleInterval) {
-		// previousDisplayCycleInterval will be used as the "head" of the display cycle (point 0s on graph)
-		previousDisplayCycleInterval = currentMillis;
-	} else { // current time frame is somewhere in between 0 ("head") to displayCycleInterval
-
-		// calculate time passed since 0 point (head)
-		unsigned long currentCycleTime = currentMillis - previousDisplayCycleInterval;
-		if (currentCycleTime < tempDisplayInterval) {
-			/**
-			 * current time is some where in the tempDisplayInterval, for example
-			 *
-			 * previousDisplayCycleInterval
-			 *			  |
-			 * 			  |	currentMillis	   tempDisplayInterval
-			 * 			  |		  |						|
-			 *	   		  |  	  | 			  	  100s	   	   	  115s		 120 seconds
-			 * head 0s->|-*-------*---------------------|---------------|-----------|
-			 * 			|		  						|				|			|
-			 *	 		|								|				|-----------|
-			 * 			|-------------------------------|				|
-			 * 				display temperature			|				|
-			 *											|				|
-			 *											|---------------|
-			 */
-			oledDisplay->displayTemp(temperature_c, humidity);
-		} else if (currentCycleTime < (tempDisplayInterval + previousServerDataDisplay)) {
-			String portString = String(configs.mqttPort);
-			oledDisplay->displayServerData(configs.mqttServer, portString);
-		} else if (currentCycleTime < (tempDisplayInterval + previousServerDataDisplay + previousSsidDDisplay)) {
-			oledDisplay->displayWifiSSID(configs.wifiSsid);
-		} else { // display last component in order
-			// TODO implement real battery voltage calculation
-			String a = "85% (FAKE)";
-			oledDisplay->displayBatteryData(a);
-		}
-	}
+    String text = "Temp:\n" + String(temperature_c) + " (C)\n\nHumidity:\n" + String(humidity) + " %";
+	oledDisplay->displaySensorData(text);
 }
 
 
@@ -209,6 +124,7 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
+
 	oledDisplay = new Oled64x48Display(1, WHITE);
 	oledDisplay->initDisplay();
 	oledDisplay->displayLogo();
