@@ -6,6 +6,8 @@
 
 #include "configs.h"
 
+bool DEBUG;
+
 bool isConfigurationMode; // Runtime var to store work mode status
 
 // MQTT server configurations
