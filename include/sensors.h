@@ -28,6 +28,8 @@ void getDataFromSensor();
 
 void getSensorsInformation();
 
-void publishDataToServer();
+void publishDataToServer(bool force);
+
+void executePublish();
 
 #endif /* SENSORS_H_ */
