@@ -30,6 +30,4 @@ void getSensorsInformation();
 
 void publishDataToServer(bool force);
 
-void executePublish();
-
 #endif /* SENSORS_H_ */
