@@ -1,4 +1,5 @@
 
+#include <ArduinoJson.h>
 #include "wifi_handler.h"
 #include "configs.h"
 
@@ -150,23 +151,31 @@ long getWifiRSSI() { // RSSI (Received Signal Strength Indicator)
  *               3 - Fair, if RSSI is < -60 dBm and >= -70 dBm
  *               4 - Weak, if RSSI is > -70 dBm
  */
-int getWifiSignalStrength() {
+String getWifiSignalStrength() {
 	long wifiStrength = getWifiRSSI();
 	if (DEBUG) {
 		Serial.print("Wifi signal strength (RSSI) is: ");
 		Serial.print(wifiStrength);
 		Serial.println(" dBm");
 	}
+
+    StaticJsonDocument<256> jsonDoc;
+    jsonDoc["rssi"] = wifiStrength;
+
 	if (wifiStrength >= -50)
-		return 1;
+        jsonDoc["rssi_description"] = "excellent";
 	else if (wifiStrength < -50 && wifiStrength >= -60)
-		return 2;
+        jsonDoc["rssi_description"] = "good";
 	else if (wifiStrength < -60 && wifiStrength >= -70)
-		return 3;
+        jsonDoc["rssi_description"] = "fair";
 	else if (wifiStrength < -70)
-		return 4;
+        jsonDoc["rssi_description"] = "weak";
 	else
-		return 0;
+        jsonDoc["rssi_description"] = "no data";
+
+    String result;
+    serializeJson(jsonDoc, result);
+    return result;
 }
 
 /**

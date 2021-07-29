@@ -19,6 +19,6 @@ void setConfigurationMode();
 
 void reconnectToWifi();
 
-int getWifiSignalStrength();
+String getWifiSignalStrength();
 
 #endif //NALKINSCLOUD_ESP8266_WIFI_HANDLER_H
