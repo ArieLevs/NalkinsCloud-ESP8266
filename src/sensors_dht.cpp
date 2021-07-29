@@ -1,6 +1,6 @@
 
 #include "Arduino.h"
-
+#include <ArduinoJson.h>
 #include "sensors.h"
 #include "functions.h"
 #include "mqtt_client.h"
@@ -12,7 +12,8 @@
 #define DHT_TYPE 	DHT22	// Set type of used DHT type
 #define DHT_PIN 	0 		// GPIO0 -> D3
 
-float temperature_c, humidity;
+StaticJsonDocument<256> jsonDoc;
+String sensorPayload;
 
 DHT dht(DHT_PIN, DHT_TYPE, 11); // 11 works fine for ESP8266
 
@@ -20,7 +21,7 @@ Oled64x48Display *oledDisplay = nullptr;
 
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
-const long publishInterval = 120000; // interval at which to send message (milliseconds)
+const long publishInterval = 15000; // interval at which to send message (milliseconds)
 
 /**
  * Publish all data to the mqtt broker
@@ -30,40 +31,15 @@ const long publishInterval = 120000; // interval at which to send message (milli
  */
 void publishDataToServer(bool force) {
     if (force) {
-        executePublish();
+        publishMessageToMQTTBroker( "v1/devices/me/telemetry", sensorPayload, false); //Send the data
     } else {
         //For each sensor, check its last publish time
         unsigned long currentMillis = millis();
         if (currentMillis - previousPublish >= publishInterval) {
             previousPublish = currentMillis;
-            executePublish();
+            publishMessageToMQTTBroker( "v1/devices/me/telemetry", sensorPayload, false); //Send the data
         }
     }
-}
-
-void executePublish() {
-    String topic;
-    char message[sizeof(float)];
-    topic = generalTopic + "temperature"; //Set a topic string that will change depending on the relevant sensor
-
-    if (isnan(temperature_c)) { //If there was an error reading data from sensor then
-        if (DEBUG)
-            Serial.println("Failed to read temperature from DHT sensor!");
-        //message = "DHT Error";
-        return;
-    } else
-        dtostrf(temperature_c, 4, 2, message); // Arduino based function converting float to string
-    publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
-
-    topic = generalTopic + "humidity"; //Set a topic string that will change depending on the relevant sensor
-    if (isnan(humidity)) { // If there was an error reading data from sensor then
-        if (DEBUG)
-            Serial.println("Failed to read humidity from DHT sensor!");
-        //message = "DHT Error";
-        return;
-    } else
-        dtostrf(humidity, 4, 2, message); // Arduino based function converting float to string
-    publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
 }
 
 /**
@@ -99,25 +75,35 @@ void sendDataToSensor(const char *topic, byte *payload) {
  * Collect data from sensors
  */
 void getDataFromSensor() {
-	// Get temperature value from DHT sensor
-	temperature_c = dht.readTemperature();
+	float temperature_c = dht.readTemperature(); // Get temperature value from DHT sensor
 	if (isnan(temperature_c)) //If there was an error reading data from sensor then
 		if (DEBUG)
 			Serial.println("Failed to read temperature from DHT sensor!");
 
-	humidity = dht.readHumidity();
+    float humidity = dht.readHumidity();
 	if (isnan(humidity)) // If there was an error reading data from sensor then
 		if (DEBUG)
 			Serial.println("Failed to read humidity from DHT sensor!");
+
+    jsonDoc["temperature"] = temperature_c;
+    jsonDoc["humidity"] = humidity;
+
+    String values;
+    serializeJson(jsonDoc, values);
+
+    sensorPayload = values;
+
 	if (DEBUG) {
-		Serial.print("Temperature C: ");
-		Serial.println(temperature_c);
-		Serial.print("Humidity: ");
-		Serial.println(humidity);
+	    Serial.print("Sensor values: ");
+		Serial.println(sensorPayload);
 	}
+
     String text = "Temp:\n" + String(temperature_c) + " (C)\n\nHumidity:\n" + String(humidity) + " %";
 	oledDisplay->displaySensorData(text);
 
+    sendWifiSignalStrength("v1/devices/me/attributes");
+
+    delay(500);
     //ESP.deepSleep(deepSleepDuration * 1000000);
 }
 
