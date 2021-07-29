@@ -10,6 +10,7 @@
 
 extern PubSubClient mqttClient;
 extern BearSSL::WiFiClientSecure wifiClientSecure;
+extern WiFiClient wifiClient;
 
 void initMqttClient();
 
@@ -19,8 +20,6 @@ String printMqttConnectionStatus(int return_code);
 
 bool connectToMQTTBroker();
 
-bool checkMQTTSSL();
-
 void disconnectFromMQTTBroker();
 
 bool checkMQTTConnection();
@@ -29,6 +28,8 @@ bool isClientConnectedToMQTTServer();
 
 void subscribeToMQTTBroker(const char *topic);
 
-bool publishMessageToMQTTBroker(const char *topic, char *message, bool isRetainedMessage);
+bool publishMessageToMQTTBroker(const String& topic, const String& message, bool isRetainedMessage);
+
+void sendWifiSignalStrength(const String& topic);
 
 #endif //NALKINSCLOUD_ESP8266_MQTT_CLIENT_H

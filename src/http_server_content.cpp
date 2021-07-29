@@ -4,10 +4,8 @@
 #include "mqtt_client.h"
 #include "functions.h"
 #include "http_server_handler.h"
-#include "sensors.h"
 
 ESP8266WebServer server;
-WiFiClientSecure wifiClientSecure;
 
 String deviceType; // The devices type definition
 String deviceId; // The devices unique id
@@ -71,10 +69,11 @@ void webServerGetMqttInfo() {
 	String sslState = "N/A";
 	if (connectToMQTTBroker()) { //Try to connect to MQTT server
 		mqttState = "CONNECTED";
-		if (checkMQTTSSL()) //Try to verify MQTT server
-			sslState = "VERIFIED";
-		else
-			sslState = "NOT SECURED!!!";
+		// TODO add TLS verification
+		//if (checkMQTTSSL()) //Try to verify MQTT server
+		//	sslState = "VERIFIED";
+		//else
+		//	sslState = "NOT SECURED!!!";
 	} else
 		mqttState = "DISCONNECTED";
 	mqttClient.disconnect(); //Disconnect from the MQTT server connected before

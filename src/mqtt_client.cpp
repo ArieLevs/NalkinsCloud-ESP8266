@@ -7,18 +7,27 @@
 #include "wifi_handler.h"
 
 PubSubClient mqttClient;
+WiFiClient wifiClient;
 
 void initMqttClient() {
     if (DEBUG) {
         Serial.print("Initializing mqtt client, isSslEncrypted status is: ");
         Serial.println(isSslEncrypted);
     }
-	wifiClientSecure = WiFiClientSecure();
-	if (isSslEncrypted)
-        wifiClientSecure.setFingerprint(fingerprint);
-	else
-        wifiClientSecure.setInsecure();
-	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClientSecure);
+    // TODO figure out the secure client issue
+//	wifiClientSecure = WiFiClientSecure();
+//	if (isSslEncrypted)
+//        wifiClientSecure.setFingerprint(fingerprint);
+//	else {
+//        if (DEBUG) {
+//            Serial.print("[WARNING] setting insecure wificlient");
+//        }
+//        wifiClientSecure.setInsecure();
+//    }
+
+    wifiClient = WiFiClient();
+
+	mqttClient = PubSubClient(configs.mqttServer.c_str(), configs.mqttPort, callback, wifiClient);
 	delay(10);
 }
 
@@ -48,16 +57,16 @@ void subscribeToMQTTBroker(const char *topic) {
  * @return boolean  true - successfully published message to server
  *                  false - failed to publish message
  */
-bool publishMessageToMQTTBroker(const char *topic, char *message, bool isRetainedMessage) {
-	// publish function is: int publish (topic, payload, length, retained)
+bool publishMessageToMQTTBroker(const String& topic, const String& message, bool isRetainedMessage) {
+	// publish function defined here https://pubsubclient.knolleary.net/api#publish
 	// 'retained' is a constant, se in ConfigFile.h
 	if (DEBUG) {
 		Serial.print("Topic: ");
 		Serial.print(topic);
 		Serial.print(" | Message: ");
-		Serial.print(message);
+		Serial.println(message);
 	}
-	if (mqttClient.publish(topic, message, isRetainedMessage)) {
+	if (mqttClient.publish(topic.c_str(), message.c_str(), isRetainedMessage)) {
 		if (DEBUG)
 			Serial.println("Successfully published!");
 		return true;
@@ -104,40 +113,13 @@ bool checkMQTTConnection() {
 	if (connectToMQTTBroker()) { // Try to connect to the MQTT server
 		if (DEBUG)
 			Serial.print("Successfully connected as: " + (String) deviceId.c_str());
-		if (checkMQTTSSL()) { // If connection was successful, check for servers SSL fingerprint
-			if (DEBUG)
-				Serial.println("Connection secure.");
-			return true;
-		} else {
-			if (DEBUG)
-				Serial.println("Connection insecure! Disconnecting");
-			mqttClient.disconnect();
-			delay(2000);
-		}
+        return true;
 	} else {
 		if (DEBUG)
 			Serial.println("Connection failed, Error = " + (String) mqttClient.state());
 		delay(2000);
 	}
 	return false;
-}
-
-
-/**
- * Generate topic containing constant device id and type, with relevant value
- *
- * @param data last topic section
- *
- * @return String full topic (as of DEVICE_ID/DEVICE_TYPE/DATA)
- */
-String generateTopic(const char *data) {
-	String result = "";
-	result += deviceId.c_str();
-	result += "/";
-	result += deviceType.c_str();
-	result += "/";
-	result += data;
-	return result;
 }
 
 
@@ -207,18 +189,17 @@ bool connectToMQTTBroker() {
 		Serial.println((char *) deviceId.c_str());
 		Serial.print("Using Password: ");
 		Serial.println(configs.devicePassword.c_str());
-		Serial.print("Using topic: ");
-		Serial.println(generateTopic("status").c_str());
 	}
 	// boolean connect (clientID, username, password, willTopic, willQoS, willRetain, willMessage)
+    // function api https://pubsubclient.knolleary.net/api#connect
 	if (mqttClient.connect(deviceId.c_str(), deviceId.c_str(), configs.devicePassword.c_str(),
-						   generateTopic("status").c_str(), QOS, retained, willMessage)) {
+						   "v1/devices/me/attributes", QOS, retained, willMessage)) {
 		if (DEBUG) {
 			Serial.print("Connection successful, status: ");
 			Serial.println(printMqttConnectionStatus(mqttClient.state()));
 		}
 		// If connected, send message with status 'online'
-		publishMessageToMQTTBroker(generateTopic("status").c_str(), "online", retained);
+		publishMessageToMQTTBroker("v1/devices/me/attributes", "online", retained);
 		return true;
 	}
 	if (DEBUG) {
@@ -230,23 +211,12 @@ bool connectToMQTTBroker() {
 
 
 /**
- * Checks for servers digital signature fingerprint
- * 
- * @return boolean  true - MQTT server fingerprint verified
- *                  false - MQTT server fingerprint invalid
- */
-bool checkMQTTSSL() {
-	return wifiClientSecure.verify(fingerprint, (char *) configs.mqttServer.c_str());
-}
-
-
-/**
  * Disconnect from MQTT server
  * Also publish a message of 'offline' for the status topic
  */
 void disconnectFromMQTTBroker() {
 	//Before disconnecting, send message with status 'offline'
-	publishMessageToMQTTBroker(generateTopic("status").c_str(), "offline", retained);
+	publishMessageToMQTTBroker("v1/devices/me/attributes", "offline", retained);
 	mqttClient.disconnect();
 }
 
@@ -264,22 +234,19 @@ bool isClientConnectedToMQTTServer() {
 
 //Set time to "delay" a wifi signal strength publish message
 unsigned long wifiSignalPreviousPublish = 0;
-const long wifiSignalPublishInterval = 60000; // interval at which to send message (milliseconds)
+const long wifiSignalPublishInterval = 120000; // interval at which to send message (milliseconds)
 
 
 /**
  * Send wifi signal strength to broker
  * Function will publish RSSI level to MQTT broker
+ *
+ * @param topic, topic to send rssi data to
  */
-void sendWifiSignalStrength() {
+void sendWifiSignalStrength(const String& topic) {
 	unsigned long currentMillis = millis();
 	if (currentMillis - wifiSignalPreviousPublish >= wifiSignalPublishInterval) {
 		wifiSignalPreviousPublish = currentMillis;
-
-		String topic = generateTopic("wifi_rssi"); //Set a topic string to indicate wifi RSSI
-		String wifiStrengthLevel = String(getWifiSignalStrength());
-
-		publishMessageToMQTTBroker((char *) topic.c_str(), (char *) wifiStrengthLevel.c_str(),
-								   notRetained); //Send the data
+		publishMessageToMQTTBroker(topic, getWifiSignalStrength(), notRetained);
 	}
 }
