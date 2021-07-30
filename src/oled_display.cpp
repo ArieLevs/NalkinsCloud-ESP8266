@@ -12,10 +12,10 @@
 #include "mqtt_client.h"
 
 // time durations to display information
-long dataInterval = 60000;
-long serverInterval = 10000;
-long ssidInterval = 5000;
-long batteryInterval = 5000;
+unsigned long dataInterval = 60000;
+unsigned long serverInterval = 10000;
+unsigned long ssidInterval = 5000;
+unsigned long batteryInterval = 5000;
 /**
  * cycleInterval is the time frame of when we "reset" shown info,
  * and its value is the sum of all displayed components.
@@ -34,7 +34,7 @@ long batteryInterval = 5000;
  *
  * NOTE!!! components must be in that orders, as a calculation in displaySensorData function takes this into account
  */
-long cycleInterval = dataInterval + serverInterval + ssidInterval + batteryInterval;
+unsigned long cycleInterval = dataInterval + serverInterval + ssidInterval + batteryInterval;
 unsigned long previousCycleInterval = 0;
 
 
