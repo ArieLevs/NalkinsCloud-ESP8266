@@ -42,8 +42,16 @@ const char PAGE_GeneralSettings[] PROGMEM = R"=====(
 <form action="generalSaved" method="post">
 <table border="0"  cellspacing="0" cellpadding="3" style="width:310px" >
 <tr>
+  <td align="right">Broker Host</td>
+  <td><input type="text" id="mqttServer" name="mqttServer" value=""></td>
+</tr>
+<tr>
+  <td align="right">Broker Port</td>
+  <td><input type="text" id="mqttPort" name="mqttPort" value=""></td>
+</tr>
+<tr>
   <td align="right">Device Password</td>
-  <td><input type="text" id="devicepassword" name="devicepassword" value=""></td>
+  <td><input type="text" id="devicePassword" name="devicePassword" value=""></td>
 </tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
@@ -63,7 +71,7 @@ const char PAGE_GeneralSettings[] PROGMEM = R"=====(
 </tr>
 <tr>
   <td align="right">Device Id</td>
-  <td><input type="text" id="deviceid" name="deviceid" value=""></td>
+  <td><input type="text" id="deviceId" name="deviceId" value=""></td>
 </tr>
 <tr>
   <td align="right">Device Type</td>
@@ -96,7 +104,17 @@ const char PAGE_GeneralSettingsSaved[] PROGMEM = R"=====(
   <script>
     window.onload = function ()
     {
-      alert("Client namd And Device password saved");
+      alert("MQTT configurations saved");
+      window.location = "/";
+    }
+  </script>
+)=====";
+
+const char PAGE_GeneralSettingsSaveFailed[] PROGMEM = R"=====(
+  <script>
+    window.onload = function ()
+    {
+      alert("Failed to save MQTT configurations check esp server logs");
       window.location = "/";
     }
   </script>

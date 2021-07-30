@@ -1,6 +1,6 @@
 
 #include <Arduino.h>
-
+#include <string.h>
 #include "mqtt_client.h"
 #include "functions.h"
 #include "http_server_handler.h"
@@ -15,14 +15,17 @@ String chipType; // The devices chip type
 // Called when 'PAGE_GeneralSettings' is built (/)
 // Will send all relevant info to be displayed on page
 void webServerGetGeneralConfigurationValues() {
-	configs.devicePassword = readStringFromEEPROM(
-			DEVICE_PASS_START_ADDR); // Read device password from EEPROM and store to 'configs' struct
+	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR); // Read device mqttServer from EEPROM and store to 'configs' struct
+    configs.mqttPort = readIntFromEEPROM(MQTT_PORT_START_ADDR); // Read device mqttPort from EEPROM and store to 'configs' struct
+    configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR); // Read device password from EEPROM and store to 'configs' struct
 	String values;
 	values += "version|" + versionNum + "|input\n";
 	values += "model|" + chipType + "|input\n";
-	values += "deviceid|" + deviceId + "|input\n";
+	values += "deviceId|" + deviceId + "|input\n";
 	values += "deviceType|" + deviceType + "|input\n";
-	values += "devicepassword|" + configs.devicePassword + "|input\n";
+	values += "devicePassword|" + configs.devicePassword + "|input\n";
+    values += "mqttServer|" + configs.mqttServer + "|input\n";
+    values += "mqttPort|" + String(configs.mqttPort) + "|input\n";
 	server.send(200, "text/plain", values.c_str());
 	Serial.println(__FUNCTION__);
 }

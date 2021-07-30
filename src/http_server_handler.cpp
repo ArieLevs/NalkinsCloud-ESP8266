@@ -18,22 +18,30 @@ void handleClient() {
 
 void handleGeneralSaved() {
 	server.on("/generalSaved", []() { // Small redirect page that indicates that general configs been saved
-		if (DEBUG)
-			Serial.println("Running generalSaved.html page");
-		if (server.arg("device_password").length() == 8) { // If Password is in the length of 8 chars
-			writeStringToEEPROM(DEVICE_PASS_START_ADDR,
-								server.arg("device_password").c_str()); //Save the password to EEPROM flash memory
-			if (DEBUG)
-				Serial.println("Device Password written to flash memory");
-			server.send_P(200, "text/html", PAGE_GeneralSettingsSaved); //And display small success redirect page
-		} else // If password length not 8 chars just go back to main menu
-		if (DEBUG)
-			Serial.println("User name or Device Password are invalid - return to main menu page");
-		// TODO ############# CONSIDER WRITING GENERAL ERROR PAGE OR DO JAVA SCRIPT VALIDATION #############
-		server.send_P(200, "text/html", PAGE_AdminMainPage);
+	    String mqttServer = server.arg("mqttServer");
+        String devicePassword = server.arg("devicePassword");
+
+        if (mqttServer.isEmpty() || devicePassword.isEmpty()) {
+            if (DEBUG) {
+                Serial.println("values cannot be empty");
+            }
+            server.send_P(200, "text/html", PAGE_GeneralSettingsSaveFailed);
+            return;
+        }
+		if (DEBUG) {
+            Serial.println("Running generalSaved.html page");
+            Serial.print("Store port ");
+            Serial.println(server.arg("mqttPort").toInt());
+        }
+
+        writeStringToEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR,devicePassword); //Save the password to EEPROM flash memory
+        writeStringToEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR,mqttServer);
+        writeIntToEEPROM(MQTT_PORT_START_ADDR, server.arg("mqttPort").toInt());
+
+        server.send_P(200, "text/html", PAGE_GeneralSettingsSaved); //And display small success redirect page
 	});
 }
-
+VblJXyYRzVu4ztkH92R9
 
 void handleAdminPage() {
 	/*
@@ -139,15 +147,15 @@ void handleAutoConfig() {
 				if (DEBUG)
 					Serial.println("Wifi connection successful, Writing wifi configs to EEPROM");
 				// If successful store wifi credentials
-				writeStringToEEPROM(SSID_START_ADDR, configs.wifiSsid);
-				writeStringToEEPROM(WIFI_PASS_START_ADDR, configs.wifiPassword);
+				writeStringToEEPROM(SSID_LENGTH_START_ADDR, SSID_START_ADDR, configs.wifiSsid);
+				writeStringToEEPROM(WIFI_PASS_LENGTH_START_ADDR, WIFI_PASS_START_ADDR, configs.wifiPassword);
 
 				if (DEBUG)
 					Serial.println("Writing MQTT config ro EEPROM");
 				// Store MQTT server info and credentials
-				writeStringToEEPROM(MQTT_SERVER_START_ADDR, configs.mqttServer);
-				writeStringToEEPROM(MQTT_PORT_START_ADDR, String(configs.mqttPort).c_str());
-				writeStringToEEPROM(DEVICE_PASS_START_ADDR, configs.devicePassword); //Save the password to flash memory
+				writeStringToEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR, configs.mqttServer);
+				writeIntToEEPROM(MQTT_PORT_START_ADDR, configs.mqttPort);
+				writeStringToEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR, configs.devicePassword); //Save the password to flash memory
 
 				server.send(200, "text/plain",
 							"{\"status\":\"success\",\"message\":\"successfully connected to wifi\"}");
