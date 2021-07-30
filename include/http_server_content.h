@@ -71,6 +71,10 @@ const char PAGE_GeneralSettings[] PROGMEM = R"=====(
 </tr>
 </table>
 
+<hr>
+
+<a href="factoryReset" style="width:250px"  class="btn btn--m btn--blue" onclick="if(!confirm('Are you sure you want to hard reset the device? This action will remove any dynamic configurations made on the device')) return false;">Factory Reset</a><br>
+
 <script>
 
 window.onload = function ()

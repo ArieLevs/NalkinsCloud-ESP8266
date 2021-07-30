@@ -167,8 +167,7 @@ void handleConfigSaved() {
 	server.on("/configSaved", []() {
 		if (DEBUG)
 			Serial.println("Running configSaved.html page");
-		for (uint8_t i = 0; i <
-							server.args(); i++) { // For each value from network configs page, run on each one and save to 'configs' struct
+		for (uint8_t i = 0; i < server.args(); i++) { // For each value from network configs page, run on each one and save to 'configs' struct
 			if (server.argName(i) == "ssid") configs.wifiSsid = server.arg(i).c_str();
 			if (server.argName(i) == "password") configs.wifiPassword = server.arg(i).c_str();
 			if (server.argName(i) == "ip_0")
@@ -282,8 +281,18 @@ void startHTTPServer() {
 	server.on("/restart", []() {
 		Serial.println("restart.html");
 		server.send_P(200, "text/html", PAGE_Restart);
+        delay(1000);
 		ESP.restart();
 	});
+
+    /**
+     * Once http://DEVICEIP/factoryReset is accessed it will restart the device
+     */
+    server.on("/factoryReset", []() {
+        Serial.println("factoryReset.html");
+        clearEEPROM();
+        server.send_P(200, "text/html", PAGE_AdminMainPage);
+    });
 
 	server.on("/style.css", []() {
 		Serial.println("style.css");

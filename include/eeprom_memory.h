@@ -48,4 +48,6 @@ void writeIntToEEPROM(int startAddress, uint8_t value);
 
 uint8_t readIntFromEEPROM(int address);
 
+void clearEEPROM();
+
 #endif //NALKINSCLOUD_ESP8266_EEPROM_MEMORY_H
