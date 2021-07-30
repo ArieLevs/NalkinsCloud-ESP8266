@@ -101,8 +101,6 @@ void getDataFromSensor() {
     String text = "Temp:\n" + String(temperature_c) + " (C)\n\nHumidity:\n" + String(humidity) + " %";
 	oledDisplay->displaySensorData(text);
 
-    sendWifiSignalStrength("v1/devices/me/attributes");
-
     delay(500);
     //ESP.deepSleep(deepSleepDuration * 1000000);
 }
