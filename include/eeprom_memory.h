@@ -8,16 +8,27 @@
 #include "Arduino.h"
 
 /*
+* EEPROM data storage allocation
 *
-* EEPROM Section
-* Bits 	0-31 	belong to SSID info
-* Bits 	32-63 	belong to wifi password info
-* Bits 	64-95 	belong to MQTT server name
-* Bits 	96-127 	belong to Customer user name
-* Bits 	128-159 belong to Device password
+* WiFi
+* Bits 	0-3 	belong to SSID Length info (4 bytes)
+* Bits 	4-35  	belong to SSID info (32 bytes)
+* Bits 	36-39 	belong to wifi password Length info (4 bytes)
+* Bits 	40-71 	belong to wifi password info (32 bytes)
+*
+* MQTT
+* Bits 	72-75 	belong to MQTT server name length (4 bytes)
+* Bits 	76-107 	belong to MQTT server name (32 bytes)
+* Bits 	108-111 belong to DeviceId length (4 bytes)
+* Bits 	112-143 belong to DeviceId (32 bytes)
+* Bits 	144-147 belong to Device password length (4 bytes)
+* Bits 	148-179 belong to Device password (32 bytes)
+
 * Bit 	494 	hold data if the device is on configuration mode
 * Bits 	495-499 belong to MQTT server port
 * Bits 	256-384 belong to MQTT server port // 128bit
+
+* single bits data
 * Bits	300-306 reserved for distillery sensor data
 * - bit 301		hold if automation job executed
 * - bit 302-305	hold temperature configs
@@ -27,6 +38,23 @@
 * Bits 	503-510 sets Device password
 *
 */
+#define SSID_LENGTH_START_ADDR 0
+#define SSID_START_ADDR 4
+#define WIFI_PASS_LENGTH_START_ADDR 36
+#define WIFI_PASS_START_ADDR 40
+
+#define MQTT_SERVER_LENGTH_START_ADDR 72
+#define MQTT_SERVER_START_ADDR 76
+#define DEVICE_ID_LENGTH_START_ADDR 108
+#define DEVICE_ID_START_ADDR 112
+#define DEVICE_PASS_LENGTH_START_ADDR 144
+#define DEVICE_PASS_START_ADDR 148
+
+// Int writable variable (4 bytes)
+#define CONFIGURATION_MODE_ADDR 492
+#define MQTT_PORT_START_ADDR 496
+#define SERVICE_MODE_FLAG_ADDR 500
+#define DHCP_FLAG_ADDR 504
 
 void initEEPROM();
 
@@ -34,19 +62,19 @@ void writeNetworkConfigs();
 
 void readNetworkConfigs();
 
-String readStringFromEEPROM(int beginAddress);
+String readStringFromEEPROM(int lengthStartAddress, int startAddress);
 
 void setConfigurationStatusFlag(uint8_t configurationStatus);
 
 bool getConfigurationStatusFlag();
 
-void writeStringToEEPROM(int startAddress, String value);
+void writeStringToEEPROM(int lengthStartAddress, int startAddress, String data);
 
 bool checkRange(String value);
 
-void writeIntToEEPROM(int startAddress, uint8_t value);
+void writeIntToEEPROM(int startAddress, int value);
 
-uint8_t readIntFromEEPROM(int address);
+int readIntFromEEPROM(int address);
 
 void clearEEPROM();
 

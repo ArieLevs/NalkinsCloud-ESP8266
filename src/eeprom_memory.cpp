@@ -13,16 +13,59 @@ void initEEPROM() {
  * Write to EEPROM a given string, starting from a given EEPROM address
  * The given addresses MUST be consistent with other parts in this code
  *
+ * @param lengthStartAddress the index value of the address that stores the length of 'data'
  * @param startAddress the index value of the address start location
- * @param value the value to write to memory
+ * @param data the data to write to memory
  */
-void writeStringToEEPROM(int startAddress, String value) {
-	char chBuffer[value.length() + 1]; // Declare char buffer
-	//value.toCharArray(chBuffer, value.length()+1); // Convert string to char array
-	value.c_str(); // Convert string to char array
-	for (unsigned int i = 0; i < sizeof(chBuffer); i++)
-		EEPROM.write(startAddress + i, chBuffer[i]);
+void writeStringToEEPROM(int lengthStartAddress, int startAddress, String data) {
+	unsigned int dateLength = data.length();
+	if (dateLength > 32) {
+		if (DEBUG) {
+			Serial.println("ERROR - data length " + String(dateLength) + " is bigger then 32, max allowed");
+			Serial.println("ERROR - CANNOT WRITE DATA TO EEPROM ");
+		}
+		return;
+	}
+
+	if (DEBUG) {
+		Serial.println("storing to flash memory: '" + data + "' at address " + String(startAddress));
+		Serial.println("data is " + String(dateLength) + " chars long");
+	}
+
+	int sizeofDataLength = sizeof(data.length());
+	// make sure sizeof(data.length()) is not bigger then 4
+	if (sizeofDataLength > 4) {
+		if (DEBUG) {
+			Serial.println("ERROR - data length is " + String(data.length()) + " and takes " + String(sizeofDataLength) + " bits, max allowed is 4 bits");
+			Serial.println("ERROR - CANNOT WRITE DATA TO EEPROM ");
+		}
+		return;
+	}
+
+	EEPROM.write(lengthStartAddress, data.length());
+	for (int i = 0; i < data.length(); i++) {
+		EEPROM.write(startAddress + i, data[i]);
+	}
 	EEPROM.commit();
+}
+
+/**
+ * Read string beginning at a given address
+ * Max string size in EEPROM is 32
+ *
+ * @param beginAddress the index value of the address start location
+ *
+ * @return String the value stored starting at beginAddress
+ */
+String readStringFromEEPROM(int lengthStartAddress, int startAddress) {
+	int dataLength = EEPROM.read(lengthStartAddress);
+
+	String retString = "";
+	// get each bit of values from the EEPROM
+	for (int i = 0; i < dataLength; i++) {
+		retString += char(EEPROM.read(startAddress + i));
+	}
+	return retString;
 }
 
 /**
@@ -37,8 +80,8 @@ void writeNetworkConfigs() {
 		Serial.println(configs.wifiPassword.c_str());
 	}
 
-	writeStringToEEPROM(SSID_START_ADDR, configs.wifiSsid);
-	writeStringToEEPROM(WIFI_PASS_START_ADDR, configs.wifiPassword);
+	writeStringToEEPROM(SSID_LENGTH_START_ADDR, SSID_START_ADDR, configs.wifiSsid);
+	writeStringToEEPROM(WIFI_PASS_LENGTH_START_ADDR, WIFI_PASS_START_ADDR, configs.wifiPassword);
 
 	EEPROM.write(DHCP_FLAG_ADDR, 1);
 
@@ -64,8 +107,8 @@ void writeNetworkConfigs() {
  * Get EEPROM network configs to global struct
  */
 void readNetworkConfigs() {
-	configs.wifiSsid = readStringFromEEPROM(0);
-	configs.wifiPassword = readStringFromEEPROM(32);
+	configs.wifiSsid = readStringFromEEPROM(SSID_LENGTH_START_ADDR, SSID_START_ADDR);
+	configs.wifiPassword = readStringFromEEPROM(WIFI_PASS_LENGTH_START_ADDR, WIFI_PASS_START_ADDR);
 
 	configs.dhcp = EEPROM.read(DHCP_FLAG_ADDR);
 
@@ -83,7 +126,7 @@ void readNetworkConfigs() {
 	configs.Gateway[3] = EEPROM.read(411);
 
 	if (DEBUG) {
-		Serial.println("Current configurations: ");
+		Serial.println("Network configurations: ");
 		Serial.print("SSID: ");
 		Serial.println(configs.wifiSsid.c_str());
 		Serial.print("Wifi Password: ");
@@ -123,19 +166,27 @@ void readNetworkConfigs() {
 	}
 }
 
-void writeIntToEEPROM(int address, uint8_t value) {
-	EEPROM.write(address, value);
+void writeIntToEEPROM(int address, int value) {
 	if (DEBUG) {
-		Serial.print("\naddress: ");
-		Serial.print(address);
-		Serial.print(" | set to: ");
-		Serial.println(value);
+		Serial.print("storing to flash memory: '" + String(value) + "' at address " + String(address));
+		Serial.print(". data size is ");
+		Serial.println(sizeof(value));
 	}
+	byte* p = (byte*) &value;
+	EEPROM.write(address, *p);
+	EEPROM.write(address + 1, *(p + 1));
+	EEPROM.write(address + 2, *(p + 2));
+	EEPROM.write(address + 3, *(p + 3));
 	EEPROM.commit();
 }
 
-uint8_t readIntFromEEPROM(int address) {
-	uint8_t value = EEPROM.read(address);
+int readIntFromEEPROM(int address) {
+	int value;
+	byte* p = (byte*) &value;
+	*p        = EEPROM.read(address);
+	*(p + 1)  = EEPROM.read(address + 1);
+	*(p + 2)  = EEPROM.read(address + 2);
+	*(p + 3)  = EEPROM.read(address + 3);
 	if (DEBUG) {
 		Serial.print("\naddress: ");
 		Serial.print(address);
@@ -143,30 +194,6 @@ uint8_t readIntFromEEPROM(int address) {
 		Serial.println(value);
 	}
 	return value;
-}
-
-/**
- * Read string beginning at a given address
- * Max string size in EEPROM is 32
- * 
- * @param beginAddress the index value of the address start location
- * 
- * @return String the value stored starting at beginAddress
- */
-String readStringFromEEPROM(int beginAddress) {
-	int index = 0;
-	char ch;
-	String retString;
-	while (true) {
-		ch = EEPROM.read(beginAddress + index);
-		if (ch == 0)
-			break;
-		if (index > 31)
-			break;
-		index++;
-		retString += ch;
-	}
-	return retString;
 }
 
 /**

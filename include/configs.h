@@ -10,17 +10,6 @@
 
 #include "Arduino.h"
 
-#define SSID_START_ADDR 0
-#define WIFI_PASS_START_ADDR 32
-#define MQTT_SERVER_START_ADDR 64
-#define USER_NAME_START_ADDR 96
-#define DEVICE_PASS_START_ADDR 128
-#define MQTT_FINGERPRINT_START_ADDR 256
-#define CONFIGURATION_MODE_ADDR 494
-#define MQTT_PORT_START_ADDR 495
-#define SERVICE_MODE_FLAG_ADDR 500
-#define DHCP_FLAG_ADDR 501
-
 // SSID Name and Password, used when device is on Access Point mode
 #define ACCESS_POINT_SSID "ESP8266"
 #define ACCESS_POINT_PASSWORD "nalkinscloud"
