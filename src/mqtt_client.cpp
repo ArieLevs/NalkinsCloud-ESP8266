@@ -243,10 +243,10 @@ const long wifiSignalPublishInterval = 120000; // interval at which to send mess
  *
  * @param topic, topic to send rssi data to
  */
-void sendWifiSignalStrength(const String& topic) {
+void sendWifiSignalStrength() {
 	unsigned long currentMillis = millis();
 	if (currentMillis - wifiSignalPreviousPublish >= wifiSignalPublishInterval) {
 		wifiSignalPreviousPublish = currentMillis;
-		publishMessageToMQTTBroker(topic, getWifiSignalStrength(), notRetained);
+		publishMessageToMQTTBroker("v1/devices/me/attributes", getWifiSignalStrength(), notRetained);
 	}
 }

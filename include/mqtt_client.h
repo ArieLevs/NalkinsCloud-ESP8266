@@ -30,6 +30,6 @@ void subscribeToMQTTBroker(const char *topic);
 
 bool publishMessageToMQTTBroker(const String& topic, const String& message, bool isRetainedMessage);
 
-void sendWifiSignalStrength(const String& topic);
+void sendWifiSignalStrength();
 
 #endif //NALKINSCLOUD_ESP8266_MQTT_CLIENT_H
