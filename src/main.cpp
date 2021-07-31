@@ -16,36 +16,23 @@ LedBlinks *ledBlink = nullptr;
 
 void setup(void) {
 	delay(500);
-	if (DEBUG) {
-		Serial.begin(115200);
-		Serial.println("Starting NalkinsCloud Sensor");
-	}
 	initEEPROM();
-	//clearEEPROM();  // Unmark to remove all data from EEPROM
-
 	initConfigs();
+
+    if (DEBUG) {
+        Serial.begin(115200);
+        Serial.println("Starting NalkinsCloud Sensor");
+    }
+
 	initSensor(); // Setup device GPIOs
 
 	ledBlink = new LedBlinks(LED_PIN); // Init led blinker object
 
 	//Get current network and other info configurations from flash memory
 	readNetworkConfigs(); // This will also return the wifi SSID and password
-	configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_START_ADDR);
-	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_START_ADDR);
-	configs.mqttPort = (uint16_t) atoi(readStringFromEEPROM(MQTT_PORT_START_ADDR).c_str());
-	//configs.mqttFingerprint = readFingerprintFromEEPROM(MQTT_FINGERPRINT_START_ADDR);
-
-	/**
-	 * ################
-	 * TEMP starts here
-	 */
-	configs.mqttServer = "10.0.1.1";
-	configs.mqttPort = 8883;
-	configs.devicePassword = "nalkinscloud";
-	/**
-	 * TEMP end here
-	 * #############
-	 */
+	configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR);
+	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR);
+	configs.mqttPort = readIntFromEEPROM(MQTT_PORT_START_ADDR);
 
 	if (DEBUG) {
 		Serial.println("Server configs: ");
@@ -76,15 +63,12 @@ void setup(void) {
 		connectToWifi();
 		if (isWifiConnected()) {
 			if (connectToMQTTBroker()) {
-				if (checkMQTTSSL()) { // Verify MQTT server certificate fingerprint
-					disconnectFromMQTTBroker();
-					if (DEBUG)
-						Serial.println("Connection tests passed successfully");
-					//WiFi.setAutoReconnect(false);
-					initializeWifiHandlers();
-					return; // All tests successful start main loop when NOT on configuration mode (isConfigurationMode = FALSE)
-				} else if (DEBUG)
-					Serial.println("MQTT SSL Verification failed");
+                disconnectFromMQTTBroker();
+                if (DEBUG)
+                    Serial.println("Connection tests passed successfully");
+                //WiFi.setAutoReconnect(false);
+                initializeWifiHandlers();
+                return; // All tests successful start main loop when NOT on configuration mode (isConfigurationMode = FALSE)
 			} else if (DEBUG)
 				Serial.println("MQTT Server Connection failed");
 		} else if (DEBUG) {
@@ -109,15 +93,17 @@ void loop(void) {
 		ledBlink->intervalBlink(500);
 		handleClient();
 	} else { // If device is on normal work mode
-		checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
+		//checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
-				//sendWifiSignalStrength();
-				publishDataToServer(); // Publish the all sensor messages
+                sendWifiSignalStrength();
+				publishDataToServer(false); // Publish the all sensor messages
 				ledBlink->intervalBlink(2500);
 			} else {
-				if (checkMQTTConnection()) // Try to connect/reconnect
-					getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
+                if (checkMQTTConnection()) // Try to connect/reconnect
+                    getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
+                else
+                    ledBlink->rapidIntervalBlink(2000);
 			}
 		} else { // Wifi handler is taking place in this point
 			if (isClientConnectedToMQTTServer())
