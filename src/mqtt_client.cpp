@@ -181,25 +181,28 @@ bool connectToMQTTBroker() {
 	const char *willMessage = "offline";
 	if (DEBUG) {
 		Serial.println("Trying connection to MQTT broker");
-		Serial.print("connecting to: ");
-		Serial.println(configs.mqttServer.c_str());
-		Serial.print("Using port: ");
-		Serial.println(configs.mqttPort);
-		Serial.print("Using deviceId: ");
-		Serial.println((char *) deviceId.c_str());
-		Serial.print("Using Password: ");
+		Serial.println("connecting to: '" + configs.mqttServer + "'");
+		Serial.println("port: '" +String(configs.mqttPort)+ "'");
+		Serial.print("deviceId: '" + deviceId + "'");
+		Serial.print("Password: ");
 		Serial.println(configs.devicePassword.c_str());
 	}
 	// boolean connect (clientID, username, password, willTopic, willQoS, willRetain, willMessage)
     // function api https://pubsubclient.knolleary.net/api#connect
-	if (mqttClient.connect(deviceId.c_str(), deviceId.c_str(), configs.devicePassword.c_str(),
+	if (mqttClient.connect(deviceId.c_str(), configs.devicePassword.c_str(), nullptr,
 						   "v1/devices/me/attributes", QOS, retained, willMessage)) {
 		if (DEBUG) {
 			Serial.print("Connection successful, status: ");
 			Serial.println(printMqttConnectionStatus(mqttClient.state()));
 		}
 		// If connected, send message with status 'online'
-		publishMessageToMQTTBroker("v1/devices/me/attributes", "online", retained);
+        /* online status is no longer needed as server attributes contain 'active' status attribute
+		StaticJsonDocument<256> jsonDoc;
+        jsonDoc["online"] = true;
+        String status;
+        serializeJson(jsonDoc, status);
+        publishMessageToMQTTBroker("v1/devices/me/attributes", status, retained);
+        */
 		return true;
 	}
 	if (DEBUG) {
@@ -216,7 +219,13 @@ bool connectToMQTTBroker() {
  */
 void disconnectFromMQTTBroker() {
 	//Before disconnecting, send message with status 'offline'
-	publishMessageToMQTTBroker("v1/devices/me/attributes", "offline", retained);
+    /* offline status is no longer needed as server attributes contain 'active' status attribute
+    StaticJsonDocument<256> jsonDoc;
+    jsonDoc["online"] = false;
+    String status;
+    serializeJson(jsonDoc, status);
+    publishMessageToMQTTBroker("v1/devices/me/attributes", status, retained);
+    */
 	mqttClient.disconnect();
 }
 
