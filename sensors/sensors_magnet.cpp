@@ -79,11 +79,11 @@ void sendDataToSensor(const char *topic, byte *payload) {
 	// If topic data equals RECEIVE_STATUS then
 	if (areCharArraysEqual(topicArray[2], RECEIVE_STATUS)) {
 		if ((char) payload[0] == '1') {// If received 1 then system armed
-			writeIntToEEPROM(IS_TRIGGERED_ADDR, (uint8_t) 1);
+			writeIntToEEPROM(IS_TRIGGERED_ADDR, 1);
 			isTriggered = true;
 		}
 		else if ((char) payload[0] == '0') { // If received 0 then system released
-			writeIntToEEPROM(IS_TRIGGERED_ADDR, (uint8_t) 0);
+			writeIntToEEPROM(IS_TRIGGERED_ADDR, 0);
 			isTriggered = false;
 			isAlarmSent = false;
 			isAlarmOn = false;

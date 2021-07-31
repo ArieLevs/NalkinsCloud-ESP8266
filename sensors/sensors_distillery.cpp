@@ -145,10 +145,10 @@ void sendDataToSensor(const char *topic, byte *payload) {
 			toBarrelDisposalStartTemperature = strtol(messageArray[4], &ptr, 10);
 
 			// Save temperature configurations
-			writeIntToEEPROM(MAIN_HEATER_TEMP_ADDR, (uint8_t) mainHeaterStartTemperature);
-			writeIntToEEPROM(WATER_COOLER_TEMP_ADDR, (uint8_t) waterCoolerStartTemperature);
-			writeIntToEEPROM(AIR_COOLER_TEMP_ADDR, (uint8_t) airCoolerStartTemperature);
-			writeIntToEEPROM(BARREL_DISPOSAL_TEMP_ADDR, (uint8_t) toBarrelDisposalStartTemperature);
+			writeIntToEEPROM(MAIN_HEATER_TEMP_ADDR, mainHeaterStartTemperature);
+			writeIntToEEPROM(WATER_COOLER_TEMP_ADDR, waterCoolerStartTemperature);
+			writeIntToEEPROM(AIR_COOLER_TEMP_ADDR, airCoolerStartTemperature);
+			writeIntToEEPROM(BARREL_DISPOSAL_TEMP_ADDR, toBarrelDisposalStartTemperature);
 			if (DEBUG) {
 				Serial.println("Temperature configurations set to:");
 				Serial.print("MAIN_HEATER: ");
