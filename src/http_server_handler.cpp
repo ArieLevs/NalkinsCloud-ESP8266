@@ -41,7 +41,6 @@ void handleGeneralSaved() {
         server.send_P(200, "text/html", PAGE_GeneralSettingsSaved); //And display small success redirect page
 	});
 }
-VblJXyYRzVu4ztkH92R9
 
 void handleAdminPage() {
 	/*
@@ -79,12 +78,12 @@ void handleReturnId() {
 			if (DEBUG)
 				Serial.println("Parsing failed");
 			server.send(200, "text/plain",
-						"{\"status\":\"failed\",\"message\":\"message contains error(s), check json syntax\"}");
+						R"({"status":"failed","message":"message contains error(s), check json syntax"})");
 			if (DEBUG)
 				Serial.println("/return_id returned error");
 		} else {
 			server.send(200, "text/plain",
-						("{\"status\":\"success\", \"device_id\":\"" + deviceId + "\", \"device_type\":\"" +
+						(R"({"status":"success", "device_id":")" + deviceId + R"(", "device_type":")" +
 						 deviceType + "\"}").c_str());
 			if (DEBUG)
 				Serial.println("/return_id returned success");
@@ -117,7 +116,7 @@ void handleAutoConfig() {
 			if (DEBUG)
 				Serial.println("Parsing failed");
 			server.send(200, "text/plain",
-						"{\"status\":\"failed\",\"message\":\"message contains error(s), check json syntax\"}");
+						R"({"status":"failed","message":"message contains error(s), check json syntax"})");
 		} else {
 			// Get JSON to global variables
 			configs.wifiSsid = (const char *) newBuffer["ssid"]; // Get SSID from JSON
@@ -158,12 +157,12 @@ void handleAutoConfig() {
 				writeStringToEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR, configs.devicePassword); //Save the password to flash memory
 
 				server.send(200, "text/plain",
-							"{\"status\":\"success\",\"message\":\"successfully connected to wifi\"}");
+							R"({"status":"success","message":"successfully connected to wifi"})");
 				if (DEBUG)
 					Serial.println("Autoconfig connection was successful, Restarting device");
 				ESP.restart();
 			}
-			server.send(200, "text/plain", "{\"status\":\"failed\",\"message\":\"could not connect to wifi\"}");
+			server.send(200, "text/plain", R"({"status":"failed","message":"could not connect to wifi"})");
 			if (DEBUG)
 				Serial.println("Autoconfig connection failed on WiFi connection");
 		}
@@ -175,7 +174,7 @@ void handleConfigSaved() {
 	server.on("/configSaved", []() {
 		if (DEBUG)
 			Serial.println("Running configSaved.html page");
-		for (uint8_t i = 0; i < server.args(); i++) { // For each value from network configs page, run on each one and save to 'configs' struct
+		for (int i = 0; i < server.args(); i++) { // For each value from network configs page, run on each one and save to 'configs' struct
 			if (server.argName(i) == "ssid") configs.wifiSsid = server.arg(i).c_str();
 			if (server.argName(i) == "password") configs.wifiPassword = server.arg(i).c_str();
 			if (server.argName(i) == "ip_0")
@@ -247,9 +246,7 @@ void startHTTPServer() {
 		if (DEBUG) {
 			Serial.println("MDNS started successfully");
 			Serial.println("Please use this URL to connect:");
-			Serial.print("http://");
-			Serial.print(DNSName.c_str());
-			Serial.println("/");
+			Serial.println("http://" + DNSName + "/");
 		}
 	} else if (DEBUG)
 		Serial.println("MDNS failed to start");
