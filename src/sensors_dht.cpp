@@ -21,7 +21,7 @@ Oled64x48Display *oledDisplay = nullptr;
 
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
-const long publishInterval = 15000; // interval at which to send message (milliseconds)
+const long publishInterval = 120000; // interval at which to send message (milliseconds)
 
 /**
  * Publish all data to the mqtt broker

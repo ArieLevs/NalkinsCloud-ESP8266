@@ -243,7 +243,7 @@ bool isClientConnectedToMQTTServer() {
 
 //Set time to "delay" a wifi signal strength publish message
 unsigned long wifiSignalPreviousPublish = 0;
-const long wifiSignalPublishInterval = 120000; // interval at which to send message (milliseconds)
+const long wifiSignalPublishInterval = 300000; // interval at which to send message (milliseconds)
 
 
 /**
