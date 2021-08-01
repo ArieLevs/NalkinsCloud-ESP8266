@@ -13,7 +13,6 @@ bool isConfigurationMode; // Runtime var to store work mode status
 // MQTT server configurations
 bool isSslEncrypted;
 
-String generalTopic;
 int QOS;
 bool retained; //Set retained messages to true
 bool notRetained; //Set retained messages to false

@@ -37,7 +37,7 @@ void publishDataToServer(bool force) {
         unsigned long currentMillis = millis();
         if (currentMillis - previousPublish >= publishInterval) {
             previousPublish = currentMillis;
-            publishMessageToMQTTBroker( "v1/devices/me/telemetry", sensorPayload, false); //Send the data
+            publishMessageToMQTTBroker("v1/devices/me/telemetry", sensorPayload, false);
         }
     }
 }
@@ -50,25 +50,27 @@ void publishDataToServer(bool force) {
  * @param topic incoming message topic
  * @param payload incoming message payload
  */
-void sendDataToSensor(const char *topic, byte *payload) {
-	// topic should be of type: "device_id/device_type/data"
-	// Char array that will store the topic in parts
-	char *topicArray[4];
+void sendDataToSensor(const char *topic, byte *payload, unsigned int length) {
+    char json[length + 1];
+    strncpy (json, (char*)payload, length);
+    json[length] = '\0';
 
-	int i = 0;
-	// Get the first section from topic
-	topicArray[i] = strtok((char *) topic, "/");
+    // Decode JSON request, 200 is the capacity of the memory pool in bytes.
+    StaticJsonDocument<256> document;
+    DeserializationError error = deserializeJson(document, json);
 
-	// Brake the topic string into parts
-	// Each array cell contains part of the topic
-	while (topicArray[i] != nullptr) {
-		topicArray[++i] = strtok(nullptr, "/");
-	}
+    if (error) {
+        Serial.print(F("deserializeJson() failed"));
+        return;
+    }
 
-	// If received message is 'update_now' then
-	if (areCharArraysEqual(topicArray[2], "update_now")) {
-		publishDataToServer(true);
-	}
+    String methodName = String((const char*)document["method"]);
+
+    if (methodName.equals("updateNow")) {
+        String responseTopic = String(topic);
+        responseTopic.replace("request", "response");
+        publishDataToServer(true);
+    }
 }
 
 /**
@@ -88,10 +90,7 @@ void getDataFromSensor() {
     jsonDoc["temperature"] = temperature_c;
     jsonDoc["humidity"] = humidity;
 
-    String values;
-    serializeJson(jsonDoc, values);
-
-    sensorPayload = values;
+    serializeJson(jsonDoc, sensorPayload);
 
 	if (DEBUG) {
 	    Serial.print("Sensor values: ");
@@ -110,8 +109,7 @@ void getDataFromSensor() {
  * Subscribe to all relevant sensors connected
  */
 void getSensorsInformation() {
-	String topic = generalTopic + "update_now";
-	subscribeToMQTTBroker((char *) topic.c_str());
+    subscribeToMQTTBroker("v1/devices/me/rpc/request/+");
 }
 
 
@@ -119,7 +117,6 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
-
 	oledDisplay = new Oled64x48Display(1, WHITE);
 	oledDisplay->initDisplay();
 	oledDisplay->displayLogo();

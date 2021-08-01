@@ -89,15 +89,16 @@ void callback(const char *topic, byte *payload, unsigned int length) {
 	if (DEBUG) {
 		Serial.println("Message arrived:");
 		Serial.print("Topic: ");
-		Serial.print(topic);
-		Serial.print(" | Payload: ");
+		Serial.println(topic);
+		Serial.print("Payload: ");
 		//For each char in message body, do
 		for (unsigned int i = 0; i < length; i++)
 			Serial.print((char) payload[i]);
 		Serial.println("");
 	}
 	delay(10);
-	sendDataToSensor(topic, payload);
+	// const char *topic, byte *payload, unsigned int length
+	sendDataToSensor(topic, payload, length);
 }
 
 

@@ -22,11 +22,11 @@
 // Bits	300-306 reserved for distillery sensor data
 // - bit 301		hold if automation job executed
 // - bits 302-305	hold temperature configs
-#define AUTOMATION_STATUS_ADDR    301
-#define MAIN_HEATER_TEMP_ADDR     302
-#define WATER_COOLER_TEMP_ADDR    303
-#define AIR_COOLER_TEMP_ADDR      304
-#define BARREL_DISPOSAL_TEMP_ADDR 305
+#define AUTOMATION_STATUS_ADDR    300
+#define MAIN_HEATER_TEMP_ADDR     304
+#define WATER_COOLER_TEMP_ADDR    308
+#define AIR_COOLER_TEMP_ADDR      312
+#define BARREL_DISPOSAL_TEMP_ADDR 316
 
 #define MAXCLK 5 // D1
 #define MAXDO  4 // D2

@@ -20,7 +20,7 @@ extern String deviceType; // The devices type definition
 extern String deviceId; // The devices unique id
 extern String chipType; // The devices chip type
 
-void sendDataToSensor(const char *topic, byte *payload);
+void sendDataToSensor(const char *topic, byte *payload, unsigned int length);
 
 void initSensor();
 

@@ -1,6 +1,6 @@
 
 #include "Arduino.h"
-
+#include <ArduinoJson.h>
 #include "sensors.h"
 #include "configs.h"
 #include "functions.h"
@@ -15,7 +15,8 @@ const int LOADCELL_SCK_PIN = 2;
 
 #define deepSleepDuration 300 // Seconds
 
-long scale_read_value;
+StaticJsonDocument<256> jsonDoc;
+String sensorPayload;
 
 HX711 scale;
 
@@ -27,25 +28,21 @@ const long publishInterval = 120000; // interval at which to send message (milli
 
 /**
  * Publish all data to the mqtt broker
+ * in case 'force' is true, publish immediately, else wait for publish cycles (publishInterval)
+ *
+ * @param force boolean
  */
-void publishDataToServer() {
-	//For each sensor, check its last publish time
-	unsigned long currentMillis = millis();
-	if (currentMillis - previousPublish >= publishInterval) {
-		previousPublish = currentMillis;
-		String topic;
-		char message[sizeof(float)];
-		topic = generalTopic + "weight"; // Set a topic string that will change depending on the relevant sensor
-
-		if (isnan(scale_read_value)) { // If there was an error reading data from sensor then
-			if (DEBUG)
-				Serial.println("Failed to read data from HX711 sensor!");
-			//message = "DHT Error";
-			return;
-		} else
-			dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
-		publishMessageToMQTTBroker((char *) topic.c_str(), message, false); //Send the data
-	}
+void publishDataToServer(bool force) {
+    if (force) {
+        publishMessageToMQTTBroker( "v1/devices/me/telemetry", sensorPayload, false); //Send the data
+    } else {
+        //For each sensor, check its last publish time
+        unsigned long currentMillis = millis();
+        if (currentMillis - previousPublish >= publishInterval) {
+            previousPublish = currentMillis;
+            publishMessageToMQTTBroker("v1/devices/me/telemetry", sensorPayload, false);
+        }
+    }
 }
 
 /**
@@ -56,31 +53,33 @@ void publishDataToServer() {
  * @param topic incoming message topic
  * @param payload incoming message payload
  */
-void sendDataToSensor(const char *topic, byte *payload) {
-	// topic should be of type: "device_id/device_type/data"
-	// Char array that will store the topic in parts
-	char *topicArray[4];
+void sendDataToSensor(const char *topic, byte *payload, unsigned int length) {
+    char json[length + 1];
+    strncpy (json, (char*)payload, length);
+    json[length] = '\0';
 
-	int i = 0;
-	// Get the first section from topic
-	topicArray[i] = strtok((char *) topic, "/");
+    // Decode JSON request, 200 is the capacity of the memory pool in bytes.
+    StaticJsonDocument<256> document;
+    DeserializationError error = deserializeJson(document, json);
 
-	// Brake the topic string into parts
-	// Each array cell contains part of the topic
-	while (topicArray[i] != nullptr) {
-		topicArray[++i] = strtok(nullptr, "/");
-	}
+    if (error) {
+        Serial.print(F("deserializeJson() failed"));
+        return;
+    }
 
-	// If received message is 'update_now' then
-	if (areCharArraysEqual(topicArray[2], "update_now")) {
-		publishDataToServer();
-	}
+    String methodName = String((const char*)document["method"]);
+
+    if (methodName.equals("updateNow")) {
+        publishDataToServer(true);
+    }
 }
 
 /**
  * Collect data from sensors
  */
 void getDataFromSensor() {
+    long scale_read_value;
+
 	// Get value from HX711 sensor
     if (scale.wait_ready_retry(10)) {
         scale_read_value = scale.read();
@@ -94,11 +93,17 @@ void getDataFromSensor() {
 		if (DEBUG)
 			Serial.println("Failed to read data from HX711 sensor!");
 
-	if (DEBUG) {
-		Serial.print("Current weight: ");
-		Serial.println(scale_read_value);
-	}
-    String text = scale_read_value;
+    if (DEBUG) {
+        Serial.print("Current weight: ");
+        Serial.println(scale_read_value);
+    }
+
+    jsonDoc["weight"] = scale_read_value;
+
+    serializeJson(jsonDoc, sensorPayload);
+
+    char message[sizeof(float)];
+    String text = dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
     oledDisplay->displaySensorData(text);
 }
 
@@ -107,8 +112,7 @@ void getDataFromSensor() {
  * Subscribe to all relevant sensors connected
  */
 void getSensorsInformation() {
-	String topic = generalTopic + "update_now";
-	subscribeToMQTTBroker((char *) topic.c_str());
+    subscribeToMQTTBroker("v1/devices/me/rpc/request/+");
 }
 
 

@@ -1,5 +1,4 @@
 
-#include <string>
 #include <Arduino.h>
 
 #include "eeprom_memory.h"
@@ -46,16 +45,9 @@ void setup(void) {
 		Serial.println(configs.mqttFingerprint);
 	}
 
-	// Define general topic for this device
-	generalTopic = deviceId + "/" + deviceType + "/";
-	if (DEBUG) {
-		Serial.print("General topic is: ");
-		Serial.println(generalTopic.c_str());
-	}
-
 	initMqttClient();
 
-	setConfigurationMode(getConfigurationStatusFlag()); // Get current device work mode (Normal or configuraion)
+	setConfigurationMode(getConfigurationStatusFlag()); // Get current device work mode (Normal or configuration)
 	setConfigurationStatusFlag(0); // Set the configuration mode flag back to false (Set to normal work mode)
 
 	if (!getConfigurationMode()) { // If The device in NOT on configuration mode
