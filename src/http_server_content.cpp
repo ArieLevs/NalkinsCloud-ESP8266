@@ -124,17 +124,10 @@ void webServerGetAvailableNetworks() {
 		Networks = "Found " + (String) n + " Networks<br>";
 		Networks += "<table border='0' cellspacing='0' cellpadding='3'>";
 		Networks += "<tr bgcolor='#DDDDDD' ><td><strong>Name</strong></td><td><strong>Quality</strong></td><td><strong>Enc</strong></td><tr>";
-		for (uint8_t i = 0; i < n; ++i) {
+		for (int i = 0; i < n; ++i) {
 			if (DEBUG)
 				Serial.println("discovered network: " + String(WiFi.SSID(i)));
-			int quality = 0;
-			if (WiFi.RSSI(i) <= -100) {
-				quality = 0;
-			} else if (WiFi.RSSI(i) >= -50) {
-				quality = 100;
-			} else {
-				quality = 2 * (WiFi.RSSI(i) + 100);
-			}
+			int quality = dbmToQuality(WiFi.RSSI(i));
 
 			Networks +=
 					"<tr><td><a href='javascript:selssid(\"" + String(WiFi.SSID(i)) + "\")'>" + String(WiFi.SSID(i)) +

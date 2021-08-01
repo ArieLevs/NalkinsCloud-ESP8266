@@ -21,4 +21,6 @@ void reconnectToWifi();
 
 String getWifiSignalStrength();
 
+int dbmToQuality(int dbm);
+
 #endif //NALKINSCLOUD_ESP8266_WIFI_HANDLER_H

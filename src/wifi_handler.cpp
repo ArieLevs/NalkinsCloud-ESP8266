@@ -140,7 +140,7 @@ void initializeWifiHandlers() {
 }
 
 
-long getWifiRSSI() { // RSSI (Received Signal Strength Indicator)
+int getWifiRSSI() { // RSSI (Received Signal Strength Indicator)
 	return WiFi.RSSI();
 }
 
@@ -152,7 +152,8 @@ long getWifiRSSI() { // RSSI (Received Signal Strength Indicator)
  *               4 - Weak, if RSSI is > -70 dBm
  */
 String getWifiSignalStrength() {
-	long wifiStrength = getWifiRSSI();
+	int wifiStrength = getWifiRSSI();
+	int wifiQuality = dbmToQuality(wifiStrength);
 	if (DEBUG) {
 		Serial.print("Wifi signal strength (RSSI) is: ");
 		Serial.print(wifiStrength);
@@ -161,6 +162,7 @@ String getWifiSignalStrength() {
 
     StaticJsonDocument<256> jsonDoc;
     jsonDoc["rssi"] = wifiStrength;
+    jsonDoc["rssi_quality"] = wifiQuality;
 
 	if (wifiStrength >= -50)
         jsonDoc["rssi_description"] = "excellent";
@@ -176,6 +178,23 @@ String getWifiSignalStrength() {
     String result;
     serializeJson(jsonDoc, result);
     return result;
+}
+
+/**
+ * Convert wifi signal strength to percentage between o to 100
+ * @param dbm integer representing RSSI strength
+ * @return integer
+ */
+int dbmToQuality(int dbm) {
+    int quality;
+    if (dbm <= -100) {
+        quality = 0;
+    } else if (dbm >= -50) {
+        quality = 100;
+    } else {
+        quality = 2 * (dbm + 100);
+    }
+    return quality;
 }
 
 /**
