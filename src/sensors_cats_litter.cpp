@@ -9,9 +9,13 @@
 
 #include "HX711.h"
 
+float calibration_factor = -19510; //-7050 worked for my 440lb max scale setup
+
 // HX711 circuit pins set
-const int LOADCELL_DOUT_PIN = 3;
-const int LOADCELL_SCK_PIN = 2;
+#define LOADCELL_DOUT_PIN 4
+#define LOADCELL_SCK_PIN 14
+
+boolean calibrationMode = false;
 
 #define deepSleepDuration 300 // Seconds
 
@@ -78,33 +82,41 @@ void sendDataToSensor(const char *topic, byte *payload, unsigned int length) {
  * Collect data from sensors
  */
 void getDataFromSensor() {
-    long scale_read_value;
+    float scale_read_value;
 
-	// Get value from HX711 sensor
-    if (scale.wait_ready_retry(10)) {
-        scale_read_value = scale.read();
-        Serial.print("HX711 reading: ");
-        Serial.println(scale_read_value);
-    } else {
-        Serial.println("HX711 not found.");
+    if (calibrationMode) {
+        scale.set_scale(calibration_factor); //Adjust to this calibration factor
+        if (DEBUG)
+            Serial.println("calibration_factor: " + String(calibration_factor));
+
+        if(Serial.available())
+        {
+            char temp = Serial.read();
+            if(temp == '+' || temp == 'a')
+                calibration_factor += 10;
+            else if(temp == '-' || temp == 'z')
+                calibration_factor -= 10;
+        }
     }
 
-	if (isnan(scale_read_value)) //If there was an error reading data from sensor then
-		if (DEBUG)
-			Serial.println("Failed to read data from HX711 sensor!");
-
+    if (scale.wait_ready_retry(10, 5))
+        scale_read_value = scale.get_units(3); // Get value from HX711 sensor
+    else
+        if (DEBUG)
+            Serial.println("HX711 not found.");
     if (DEBUG) {
-        Serial.print("Current weight: ");
-        Serial.println(scale_read_value);
+        Serial.println("HX711 reading: " + String(scale_read_value) + " kg");
     }
 
-    jsonDoc["weight"] = scale_read_value;
+    jsonDoc["weight_kg"] = scale_read_value;
 
     serializeJson(jsonDoc, sensorPayload);
 
     char message[sizeof(float)];
     String text = dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
-    oledDisplay->displaySensorData(text);
+//    oledDisplay->displaySensorData(text);
+
+    delay(5);
 }
 
 
@@ -120,15 +132,31 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
-	oledDisplay = new Oled64x48Display(1, WHITE);
-	oledDisplay->initDisplay();
-	oledDisplay->displayLogo();
+//	oledDisplay = new Oled64x48Display(1, WHITE);
+//	oledDisplay->initDisplay();
+//	oledDisplay->displayLogo();
+
+    if (DEBUG) {
+        Serial.println("##################################");
+        Serial.println("# initializing cats litter scale #");
+        Serial.println("##################################");
+    }
 
 	deviceType = "HX711"; // The devices type definition
 	deviceId = "test_hx711_device_id"; // The devices unique id
 	chipType = "ESP8266"; // The devices chip type
 
     scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); // init weight sensor
+
+    if (calibrationMode)
+        scale.set_scale();
+    else
+        scale.set_scale(calibration_factor);
+    long zero_factor = scale.read_average(); //Get a baseline reading
+    if (DEBUG)
+        Serial.println(">>> Zero factor: " + String(zero_factor) + " <<<");
+
+    scale.tare();
 
 	pinMode(CONFIGURATION_MODE_BUTTON, INPUT); // Setup Configuration mode button
 }
