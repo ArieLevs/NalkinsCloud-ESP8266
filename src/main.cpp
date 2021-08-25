@@ -10,6 +10,8 @@
 
 #include "sensors.h" // Load sensors global variables // THIS SHOULD BE CHANGED ON DEVICE CHANGE
 
+#define CONFIGURATION_MODE_BUTTON D6 // Pin which define the button that sets the device to configuration mode
+
 strConfigs configs;
 LedBlinks *ledBlink = nullptr;
 
@@ -25,7 +27,7 @@ void setup(void) {
 
 	initSensor(); // Setup device GPIOs
 
-	ledBlink = new LedBlinks(LED_PIN); // Init led blinker object
+	ledBlink = new LedBlinks(LED_BUILTIN); // Init led blinker object LED_BUILTIN == D4 == GPIO 2
 
 	//Get current network and other info configurations from flash memory
 	readNetworkConfigs(); // This will also return the wifi SSID and password
@@ -85,7 +87,7 @@ void loop(void) {
 		ledBlink->intervalBlink(500);
 		handleClient();
 	} else { // If device is on normal work mode
-		//checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
+		checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
                 sendWifiSignalStrength();
@@ -97,10 +99,9 @@ void loop(void) {
                 else
                     ledBlink->rapidIntervalBlink(2000);
 			}
-		} else { // Wifi handler is taking place in this point
-			if (isClientConnectedToMQTTServer())
-				disconnectFromMQTTBroker();
+		} else { // Wifi handler is taking place at this point
+			// if network is lost then connection to server must be lost
 			ledBlink->rapidIntervalBlink(2000);
 		}
 	}
-} 
+}
