@@ -7,6 +7,10 @@
 
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include "Arduino.h"
+#include "global_configs.h"
+#include "wifi_handler.h"
+#include "sensors.h"
 
 extern PubSubClient mqttClient;
 extern BearSSL::WiFiClientSecure wifiClientSecure;

@@ -1,8 +1,5 @@
 
-#include <HardwareSerial.h>
-#include "EEPROM.h"
 #include "eeprom_memory.h"
-#include "configs.h"
 
 
 void initEEPROM() {

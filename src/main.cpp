@@ -7,10 +7,8 @@
 #include "functions.h"
 #include "led_blinks.h"
 #include "http_server_handler.h"
-
-#include "sensors.h" // Load sensors global variables // THIS SHOULD BE CHANGED ON DEVICE CHANGE
-
-#define CONFIGURATION_MODE_BUTTON D6 // Pin which define the button that sets the device to configuration mode
+#include "global_configs.h"
+#include "sensors.h"
 
 strConfigs configs;
 LedBlinks *ledBlink = nullptr;

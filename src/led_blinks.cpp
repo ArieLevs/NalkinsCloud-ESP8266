@@ -7,7 +7,7 @@
  *
  * @param interval
  */
-void LedBlinks::intervalBlink(long interval) {
+void LedBlinks::intervalBlink(unsigned long interval) {
 	unsigned long currentMillis = millis();
 	if (currentMillis - blinkPreviousStart >= interval) {
 		blinkPreviousStart = currentMillis;
@@ -25,7 +25,7 @@ void LedBlinks::intervalBlink(long interval) {
  *
  * @param uint8_t GPIO number of LED pin
  */
-void LedBlinks::rapidIntervalBlink(long interval) {
+void LedBlinks::rapidIntervalBlink(unsigned long interval) {
 	unsigned long currentMillis = millis();
 	if (currentMillis - blinkPreviousStart >= interval) {
 		blinkPreviousStart = currentMillis;

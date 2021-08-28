@@ -3,13 +3,15 @@
 //
 
 #include "http_server_handler.h"
-#include "configs.h"
+#include "global_configs.h"
 #include "eeprom_memory.h"
 #include "http_server_content.h"
 #include "wifi_handler.h"
 #include "mqtt_client.h"
-#include "sensors.h"
 
+extern String deviceType; // The devices type definition
+extern String deviceId; // The devices unique id
+extern String chipType; // The devices chip type
 
 void handleClient() {
 	server.handleClient();

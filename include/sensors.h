@@ -11,14 +11,10 @@
 #include "buzzer.h"
 
 // Define sensors GPIOs
-#define CONFIGURATION_MODE_BUTTON 13 // GPIO13 -> D7, Pin which define the button that sets the device to configuration mode
 #define BUZZER 14					 // GPIO14 -> D5
 #define BUZZER_FREQUENCY 1000
-#define LED_PIN 2			 		 // GPIO2 -> D4
-
-extern String deviceType; // The devices type definition
-extern String deviceId; // The devices unique id
-extern String chipType; // The devices chip type
+// Define device GPIOs
+#define CONFIGURATION_MODE_BUTTON D6 // Pin which define the button that sets the device to configuration mode
 
 void sendDataToSensor(const char *topic, byte *payload, unsigned int length);
 

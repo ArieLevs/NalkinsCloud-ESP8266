@@ -5,7 +5,7 @@
 #ifndef NALKINSCLOUD_ESP8266_FUNCTIONS_H
 #define NALKINSCLOUD_ESP8266_FUNCTIONS_H
 
-#include "configs.h"
+//#include "global_configs.h"
 #include "wifi_handler.h"
 #include "eeprom_memory.h"
 

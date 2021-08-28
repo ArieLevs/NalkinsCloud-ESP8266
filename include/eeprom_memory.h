@@ -6,6 +6,9 @@
 #define NALKINSCLOUD_ESP8266_EEPROM_MEMORY_H
 
 #include "Arduino.h"
+#include <HardwareSerial.h>
+#include "EEPROM.h"
+#include "global_configs.h"
 
 /*
 * EEPROM data storage allocation
@@ -51,6 +54,7 @@
 #define DEVICE_PASS_START_ADDR 148
 
 // Int writable variable (4 bytes)
+#define CALIBRATION_ADDR 488
 #define CONFIGURATION_MODE_ADDR 492
 #define MQTT_PORT_START_ADDR 496
 #define SERVICE_MODE_FLAG_ADDR 500

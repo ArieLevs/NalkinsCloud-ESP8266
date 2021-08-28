@@ -2,18 +2,22 @@
 #include "Arduino.h"
 #include <ArduinoJson.h>
 #include "sensors.h"
-#include "configs.h"
+#include "global_configs.h"
 #include "functions.h"
 #include "mqtt_client.h"
 #include "oled_display.h"
+#include "device.h"
+#include "led_rgb.h"
 
 #include "HX711.h"
 
 float calibration_factor = -19510; //-7050 worked for my 440lb max scale setup
 
 // HX711 circuit pins set
-#define LOADCELL_DOUT_PIN 4
-#define LOADCELL_SCK_PIN 14
+#define LOADCELL_DOUT_PIN D7
+#define LOADCELL_SCK_PIN D8
+#define STATUS_LED_PIN D2
+#define RESET_BTN_PIN D3
 
 boolean calibrationMode = false;
 
@@ -25,6 +29,15 @@ String sensorPayload;
 HX711 scale;
 
 Oled64x48Display *oledDisplay = nullptr;
+LedRgb *statusLed = nullptr;
+
+boolean checkResetButton(uint8_t pinNum) {
+    if (digitalRead(pinNum) == HIGH) { // If button is pressed then
+        scale.tare();
+        return true;
+    }
+    return false;
+}
 
 //Set time to "delay" a publish message
 unsigned long previousPublish = 0;
@@ -84,6 +97,8 @@ void sendDataToSensor(const char *topic, byte *payload, unsigned int length) {
 void getDataFromSensor() {
     float scale_read_value;
 
+    checkResetButton(RESET_BTN_PIN);
+
     if (calibrationMode) {
         scale.set_scale(calibration_factor); //Adjust to this calibration factor
         if (DEBUG)
@@ -112,10 +127,12 @@ void getDataFromSensor() {
 
     serializeJson(jsonDoc, sensorPayload);
 
+    // convert scale_read_value from KG to grams
+    statusLed->showColorRange(200, static_cast<int>(scale_read_value*1000), 500);
+
     char message[sizeof(float)];
     String text = dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
 //    oledDisplay->displaySensorData(text);
-
     delay(5);
 }
 
@@ -132,15 +149,18 @@ void getSensorsInformation() {
  * Initialize all sensors present in the system
  */
 void initSensor() {
-//	oledDisplay = new Oled64x48Display(1, WHITE);
-//	oledDisplay->initDisplay();
-//	oledDisplay->displayLogo();
-
     if (DEBUG) {
         Serial.println("##################################");
         Serial.println("# initializing cats litter scale #");
         Serial.println("##################################");
     }
+
+	oledDisplay = new Oled64x48Display(1, WHITE);
+	oledDisplay->initDisplay();
+	oledDisplay->displayLogo();
+
+    statusLed = new LedRgb(STATUS_LED_PIN, 1);
+    statusLed->initLed();
 
 	deviceType = "HX711"; // The devices type definition
 	deviceId = "test_hx711_device_id"; // The devices unique id
@@ -152,11 +172,21 @@ void initSensor() {
         scale.set_scale();
     else
         scale.set_scale(calibration_factor);
-    long zero_factor = scale.read_average(); //Get a baseline reading
+    long zero_factor = 0;
     if (DEBUG)
+        Serial.println("Trying to find HX711");
+    if (not scale.wait_ready_retry(20, 50)) {
+        if (DEBUG)
+            Serial.println("HX711 not found.");
+    } else {
+        if (DEBUG)
+            Serial.println("HX711 found, getting zero factor values");
+        zero_factor = scale.read_average(); //Get a baseline reading
+        scale.tare();
+    }
+
+    if (DEBUG) {
         Serial.println(">>> Zero factor: " + String(zero_factor) + " <<<");
-
-    scale.tare();
-
+    }
 	pinMode(CONFIGURATION_MODE_BUTTON, INPUT); // Setup Configuration mode button
 }

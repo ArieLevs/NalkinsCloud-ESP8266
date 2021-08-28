@@ -27,9 +27,10 @@ void LedRgb::showColorRange(int minVal, int currentVal, int maxVal) {
         percentage = (static_cast<float>(currentVal - minVal) / static_cast<float>(maxVal - minVal)) * 100;
     }
 
-    // 21845 is hue value for green
-    // 437 is the value of 1/100 from (65536 - 21845)
-    long pixelHue = static_cast<long>(percentage) * 437 + 21845;
+    // huw is a scale from 0 to 65535 when 21845 (65536/3) is hue value for green, 32768 (65536/2) is yellow and 0 is value for red
+    // the pixelHue should start at green and descend to 0
+    // 219 is the value of 1/100 from 21845
+    long pixelHue = 21845 - (static_cast<long>(percentage) * 219);
 
     for(int i=0; i< led->numPixels(); i++) {
         led->setPixelColor(i, Adafruit_NeoPixel::gamma32(Adafruit_NeoPixel::ColorHSV(pixelHue)));

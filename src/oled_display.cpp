@@ -2,12 +2,12 @@
 // Created by Arie Lev on 2019-07-13.
 //
 
-#include <SPI.h>
+//#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
 
 #include "oled_display.h"
-#include "configs.h"
+#include "global_configs.h"
 #include "wifi_handler.h"
 #include "mqtt_client.h"
 

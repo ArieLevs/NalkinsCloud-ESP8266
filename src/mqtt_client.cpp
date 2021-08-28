@@ -1,10 +1,5 @@
 
-#include "Arduino.h"
-
 #include "mqtt_client.h"
-#include "configs.h"
-#include "sensors.h"
-#include "wifi_handler.h"
 
 PubSubClient mqttClient;
 WiFiClient wifiClient;
@@ -80,7 +75,7 @@ bool publishMessageToMQTTBroker(const String& topic, const String& message, bool
 
 /**
  * mqtt callback function, called when new messages arrives
- * 
+ *
  * @param topic incoming message topic
  * @param payload incoming message payload
  * @param length integer value of payload string length

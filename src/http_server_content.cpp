@@ -1,6 +1,5 @@
 
 #include <Arduino.h>
-#include <string.h>
 #include "mqtt_client.h"
 #include "functions.h"
 #include "http_server_handler.h"

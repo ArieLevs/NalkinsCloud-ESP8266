@@ -5,8 +5,8 @@
 *      Author: ArieL
 */
 
-#ifndef CONFIGS_H_
-#define CONFIGS_H_
+#ifndef NALKINSCLOUD_ESP8266_GLOBAL_CONFIGS_H_
+#define NALKINSCLOUD_ESP8266_GLOBAL_CONFIGS_H_
 
 #include "Arduino.h"
 
@@ -22,7 +22,6 @@ extern bool isConfigurationMode; // Runtime var to store work mode status
 // MQTT server configurations
 const char fingerprint[] PROGMEM = "24 4A 4D E8 D3 5B EE 8A CC C6 26 3C 22 6F 54 2C 59 02 1F F4"; // SHA1 - 60 Bytes
 
-extern String generalTopic;
 extern int QOS;
 extern bool retained; //Set retained messages to true
 extern bool notRetained; //Set retained messages to false
@@ -30,6 +29,10 @@ extern bool notRetained; //Set retained messages to false
 // DNS name to access device on STA mode
 extern String DNSName;
 extern String versionNum;
+
+extern String deviceType; // The devices type definition
+extern String deviceId; // The devices unique id
+extern String chipType; // The devices chip type
 
 struct strConfigs {
 	String wifiSsid;
@@ -48,11 +51,11 @@ extern strConfigs configs;
 
 void initConfigs();
 
-void setConfigurationMode(bool value);
-
 bool getConfigurationMode();
 
-#endif /* CONFIGS_H_ */
+void setConfigurationMode(bool value);
+
+#endif /* NALKINSCLOUD_ESP8266_GLOBAL_CONFIGS_H_ */
 
 
 

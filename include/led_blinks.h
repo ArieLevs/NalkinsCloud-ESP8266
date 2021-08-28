@@ -11,8 +11,8 @@ class LedBlinks {
 public:
 	explicit LedBlinks(uint8_t _ledPin);
 
-	void intervalBlink(long interval);
-	void rapidIntervalBlink(long interval);
+	void intervalBlink(unsigned long interval);
+	void rapidIntervalBlink(unsigned long interval);
 
 private:
 	uint8_t ledPin;

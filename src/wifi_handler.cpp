@@ -1,7 +1,7 @@
 
 #include <ArduinoJson.h>
 #include "wifi_handler.h"
-#include "configs.h"
+#include "global_configs.h"
 
 //WIFI handlers
 WiFiEventHandler wifiConnectedHandler;
