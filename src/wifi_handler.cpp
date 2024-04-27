@@ -123,8 +123,8 @@ void setConfigurationMode() {
 	//Start AP mode
 	WiFi.softAP(ACCESS_POINT_SSID, ACCESS_POINT_PASSWORD);
 	if (DEBUG) {
-		Serial.println("\nSoftAP started, address is: ");
-		Serial.print(WiFi.softAPIP());
+		Serial.print("\nSoftAP started, address is: ");
+		Serial.println(WiFi.softAPIP());
 	}
 	delay(10);
 }

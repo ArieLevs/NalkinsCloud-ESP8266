@@ -9,7 +9,7 @@ void CatLitter::getDataFromSensor() {
 
     if (calibrationMode) {
         scale.set_scale(calibration_factor); //Adjust to this calibration factor
-        if (debug)
+        if (DEBUG)
             Serial.println("calibration_factor: " + String(calibration_factor));
 
         if (Serial.available()) {
@@ -21,21 +21,24 @@ void CatLitter::getDataFromSensor() {
         }
     }
 
-    if (scale.wait_ready_retry(10, 5))
+    if (scale.wait_ready_retry(10, 5)) {
         scale_read_value = scale.get_units(3); // Get value from HX711 sensor
-    else if (debug)
-        Serial.println("HX711 not found.");
-    if (debug) {
-        Serial.println("HX711 reading: " + String(scale_read_value) + " kg");
+        if (DEBUG)
+            Serial.println("HX711 reading: " + String(scale_read_value) + " kg");
     }
+    else if (DEBUG)
+        Serial.println("HX711 not found.");
 
+    StaticJsonDocument<256> jsonDoc;
     jsonDoc["weight_kg"] = scale_read_value;
-    serializeJson(jsonDoc, sensorPayload);
+
+    String output;
+    serializeJson(jsonDoc, output);
+
+    sensorPayload = output;
 
     int maxVal = 500;
-
     if (initStatusLed) {
-        // convert scale_read_value from KG to grams
         statusLed->showColorRange(200, static_cast<int>(scale_read_value * 1000), maxVal);
     }
 
@@ -56,7 +59,10 @@ void CatLitter::getDataFromSensor() {
 }
 
 boolean CatLitter::checkResetButton() {
-    if (digitalRead(RESET_BTN_PIN) == HIGH) { // If button is pressed then
+    Serial.print("checking reset button from pin: ");
+    uint8_t pinNum = D3;
+    Serial.println(pinNum);
+    if (digitalRead(D3) == HIGH) { // If button is pressed then
         scale.tare();
         return true;
     }

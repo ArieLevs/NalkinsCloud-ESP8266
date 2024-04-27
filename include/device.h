@@ -6,9 +6,10 @@
 #define NALKINSCLOUD_ESP8266_DEVICE_H
 
 // Define device GPIOs
-#define CONFIGURATION_MODE_BUTTON D6 // Pin which define the button that sets the device to configuration mode
+#define CONFIGURATION_MODE_BUTTON D3 // Pin which define the button that sets the device to configuration mode
 
 #define STATUS_LED_PIN D2
+#define RESET_BTN_PIN D3
 #define BUZZER_PIN D5
 #define BUZZER_FREQUENCY 1000
 
@@ -101,7 +102,6 @@ protected:
     String deviceType;
     String chipType;
 
-    StaticJsonDocument<256> jsonDoc;
     String sensorPayload;
 
     boolean initDisplay = false;

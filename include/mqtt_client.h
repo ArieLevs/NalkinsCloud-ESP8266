@@ -10,7 +10,6 @@
 #include "Arduino.h"
 #include "global_configs.h"
 #include "wifi_handler.h"
-#include "sensors.h"
 
 extern PubSubClient mqttClient;
 extern BearSSL::WiFiClientSecure wifiClientSecure;
@@ -35,5 +34,7 @@ void subscribeToMQTTBroker(const char *topic);
 bool publishMessageToMQTTBroker(const String& topic, const String& message, bool isRetainedMessage);
 
 void sendWifiSignalStrength();
+
+#include "device.h"
 
 #endif //NALKINSCLOUD_ESP8266_MQTT_CLIENT_H

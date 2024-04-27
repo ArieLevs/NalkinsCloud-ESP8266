@@ -30,6 +30,12 @@ Init new project using the [esp8266-12 board](https://docs.platformio.org/en/lat
 platformio init --ide clion --board esp12e
 ```
 
+Install/Update libraries
+```shell
+platformio lib install
+platformio lib update
+```
+
 Build and Upload project as [instructed here](https://docs.platformio.org/en/latest/integration/ide/clion.html#build-upload)
 
 Post Installation

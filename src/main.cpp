@@ -8,10 +8,11 @@
 #include "led_blinks.h"
 #include "http_server_handler.h"
 #include "global_configs.h"
-#include "sensors.h"
+#include "device_cat_litter.h"
 
 strConfigs configs;
 LedBlinks *ledBlink = nullptr;
+CatLitter *device = nullptr;
 
 void setup(void) {
 	delay(500);
@@ -20,10 +21,12 @@ void setup(void) {
 
     if (DEBUG) {
         Serial.begin(115200);
+		Serial.println("");
         Serial.println("Starting NalkinsCloud Sensor");
     }
 
-	initSensor(); // Setup device GPIOs
+	// CatLitter device("test_hx711_device_id", false, false, true, false, false);
+    device = new CatLitter("fb5352c0-039f-11ef-b48f-b524b21d4776", false, false, true, false, true);
 
 	ledBlink = new LedBlinks(LED_BUILTIN); // Init led blinker object LED_BUILTIN == D4 == GPIO 2
 
@@ -80,7 +83,8 @@ void setup(void) {
 
 void loop(void) {
 	delay(50);
-	getDataFromSensor(); // Execute main work here
+	// device->checkResetButton();
+	device->getDataFromSensor(); // Execute main work here
 	if (getConfigurationMode()) { // If device on configuration mode then handle http server
 		ledBlink->intervalBlink(500);
 		handleClient();
@@ -89,17 +93,17 @@ void loop(void) {
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
                 sendWifiSignalStrength();
-				publishDataToServer(false); // Publish the all sensor messages
+                device->publishDataToServer(false); // Publish the all sensor messages
 				ledBlink->intervalBlink(2500);
 			} else {
-                if (checkMQTTConnection()) // Try to connect/reconnect
-                    getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
+                if (checkMQTTConnection()) { // Try to connect/reconnect
+                    device->getSensorsInformation(); // Get all relevant sensor and start MQTT subscription
+				}
                 else
                     ledBlink->rapidIntervalBlink(2000);
 			}
 		} else { // Wifi handler is taking place at this point
-			// if network is lost then connection to server must be lost
-			ledBlink->rapidIntervalBlink(2000);
+			ledBlink->rapidIntervalBlink(2000); // if network is lost then connection to server must be lost
 		}
 	}
 }

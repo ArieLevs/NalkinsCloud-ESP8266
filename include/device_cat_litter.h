@@ -18,6 +18,7 @@ class CatLitter : public Device {
 public:
     explicit CatLitter(const String& _deviceId, boolean _calibrationMode, boolean _initDisplay, boolean _initStatusLed, boolean _initBuzzer, boolean debug);
 
+    //void sendDataToSensor(const char *topic, byte *payload, unsigned int length);
     void getDataFromSensor() override;
     boolean checkResetButton();
 private:

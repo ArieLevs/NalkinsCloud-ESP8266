@@ -93,7 +93,9 @@ void callback(const char *topic, byte *payload, unsigned int length) {
 	}
 	delay(10);
 	// const char *topic, byte *payload, unsigned int length
-	sendDataToSensor(topic, payload, length);
+	Device d;
+	d.sendDataToSensor(topic, payload, length);
+	// sendDataToSensor(topic, payload, length);
 }
 
 
@@ -179,8 +181,7 @@ bool connectToMQTTBroker() {
 		Serial.println("Trying connection to MQTT broker");
 		Serial.println("connecting to: '" + configs.mqttServer + "'");
 		Serial.println("port: '" +String(configs.mqttPort)+ "'");
-		Serial.print("deviceId: '" + deviceId + "'");
-		Serial.print("Password: ");
+		Serial.print("deviceId: '" + deviceId + "', password:");
 		Serial.println(configs.devicePassword.c_str());
 	}
 	// boolean connect (clientID, username, password, willTopic, willQoS, willRetain, willMessage)
