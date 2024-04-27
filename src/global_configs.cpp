@@ -5,6 +5,7 @@
 #include "Arduino.h"
 
 #include "global_configs.h"
+#include "device.h"
 
 bool DEBUG;
 
@@ -19,7 +20,6 @@ bool notRetained; //Set retained messages to false
 
 // DNS name to access device on STA mode
 String DNSName;
-String versionNum;
 
 void initConfigs() {
     DEBUG = true;
@@ -31,10 +31,7 @@ void initConfigs() {
     notRetained = false; //Set retained messages to false
     // DNS name to access device on STA mode
     DNSName = "esp8266.local";
-    versionNum = "1.0.0.0";
     configs = {};
-
-    deviceId = "test_hx711_device_id";
 }
 
 bool getConfigurationMode() {

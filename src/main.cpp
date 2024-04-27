@@ -25,13 +25,16 @@ void setup(void) {
         Serial.println("Starting NalkinsCloud Sensor");
     }
 
-	// CatLitter device("test_hx711_device_id", false, false, true, false, false);
-    device = new CatLitter("fb5352c0-039f-11ef-b48f-b524b21d4776", false, false, true, false, true);
-
+    device = new CatLitter("048018f0-04aa-11ef-af4c-95c2f1842409", false, true, false, false, true);
 	ledBlink = new LedBlinks(LED_BUILTIN); // Init led blinker object LED_BUILTIN == D4 == GPIO 2
 
+	
 	//Get current network and other info configurations from flash memory
 	readNetworkConfigs(); // This will also return the wifi SSID and password
+	configs.deviceId = device->getDeviceId();
+	configs.deviceType = device->getDeviceType();
+	configs.chipType = device->getChipType();
+	configs.deviceVersion = device->getDeviceVersion();
 	configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR);
 	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR);
 	configs.mqttPort = readIntFromEEPROM(MQTT_PORT_START_ADDR);
@@ -83,13 +86,12 @@ void setup(void) {
 
 void loop(void) {
 	delay(50);
-	// device->checkResetButton();
 	device->getDataFromSensor(); // Execute main work here
 	if (getConfigurationMode()) { // If device on configuration mode then handle http server
 		ledBlink->intervalBlink(500);
 		handleClient();
 	} else { // If device is on normal work mode
-		checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
+		//checkConfigurationButton(CONFIGURATION_MODE_BUTTON); // Check if conf button pressed for more than 5 seconds
 		if (isWifiConnected()) {
 			if (mqttClient.loop()) { // If MQTT client is connected to MQTT broker
                 sendWifiSignalStrength();

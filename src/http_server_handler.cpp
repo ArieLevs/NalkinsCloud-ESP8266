@@ -9,9 +9,6 @@
 #include "wifi_handler.h"
 #include "mqtt_client.h"
 
-extern String deviceType; // The devices type definition
-extern String deviceId; // The devices unique id
-extern String chipType; // The devices chip type
 
 void handleClient() {
 	server.handleClient();
@@ -85,8 +82,8 @@ void handleReturnId() {
 				Serial.println("/return_id returned error");
 		} else {
 			server.send(200, "text/plain",
-						(R"({"status":"success", "device_id":")" + deviceId + R"(", "device_type":")" +
-						 deviceType + "\"}").c_str());
+						(R"({"status":"success", "device_id":")" + configs.deviceId + R"(", "device_type":")" +
+						 configs.deviceType + "\"}").c_str());
 			if (DEBUG)
 				Serial.println("/return_id returned success");
 		}

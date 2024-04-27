@@ -7,6 +7,10 @@
 
 #include "Arduino.h"
 
+/**
+ * Implements the D1 mini buzzer shield https://www.wemos.cc/en/latest/d1_mini_shield/buzzer.html
+ * example: https://github.com/wemos/D1_mini_Examples/blob/master/examples/04.Shields/RGB_LED_Shield/simple/simple.ino
+*/
 class Buzzer {
 public:
 	Buzzer(uint8_t buzzerPin, int buzzerFrequency, long _buzzerInterval);
@@ -19,7 +23,7 @@ private:
 	uint8_t buzzerPin;
 	int buzzerFrequency;
 	unsigned long buzzerPreviousStart;
-	long buzzerInterval;
+	unsigned long buzzerInterval;
 	bool buzzerIsOn;
 };
 

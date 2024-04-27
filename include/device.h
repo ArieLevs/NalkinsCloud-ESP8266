@@ -92,6 +92,22 @@ public:
         }
     }
 
+    String getDeviceId() {
+        return selfDeviceId;
+    }
+
+    String getDeviceType() {
+        return deviceType;
+    }
+
+    String getChipType() {
+        return chipType;
+    }
+
+    String getDeviceVersion() {
+        return deviceVersion;
+    }
+
 private:
     //Set time to "delay" a publish message
     unsigned long previousPublish = 0;
@@ -101,6 +117,7 @@ protected:
     String selfDeviceId;
     String deviceType;
     String chipType;
+    String deviceVersion;
 
     String sensorPayload;
 

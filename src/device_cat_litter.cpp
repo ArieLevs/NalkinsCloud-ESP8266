@@ -37,32 +37,42 @@ void CatLitter::getDataFromSensor() {
 
     sensorPayload = output;
 
-    int maxVal = 500;
+    int maxVal = 500; // indicates 500 grams in wheight
     if (initStatusLed) {
         statusLed->showColorRange(200, static_cast<int>(scale_read_value * 1000), maxVal);
     }
 
     if (initDisplay) {
         char message[sizeof(float)];
-        String text = dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
+        String dtostrfResult = dtostrf(scale_read_value, 4, 2, message); // Arduino based function converting float to string
+        String text = "wheight:\n" + dtostrfResult + " kg";
         ledDisplay->displaySensorData(text);
     }
 
     if (initBuzzer) {
-        if (static_cast<int>(scale_read_value) > maxVal)
+        if (static_cast<int>(scale_read_value * 1000) > maxVal)
             alarmBuzzer->executeBuzzer();
         else
             alarmBuzzer->stopBuzzer();
     }
 
+    checkResetButton();
     delay(500);
 }
 
+/**
+ * Based on the D1 mini 1-button shield https://www.wemos.cc/en/latest/d1_mini_shield/1_button.html
+ * examples: https://github.com/wemos/D1_mini_Examples/tree/master/examples/04.Shields/1_Button_Shield
+ * 
+ * @return true if a tare (scale rest to 0) has occured
+*/
 boolean CatLitter::checkResetButton() {
-    Serial.print("checking reset button from pin: ");
-    uint8_t pinNum = D3;
-    Serial.println(pinNum);
-    if (digitalRead(D3) == HIGH) { // If button is pressed then
+    if (digitalRead(RESET_BTN_PIN) == LOW) { // If button is pressed then
+        if (DEBUG) {
+            Serial.print("detected a LOW (pressed) value for pin: ");
+            Serial.print(RESET_BTN_PIN);
+            Serial.println(" issue a scale tare (reset to 0)");
+        }
         scale.tare();
         return true;
     }
@@ -79,6 +89,7 @@ CatLitter::CatLitter(const String& _deviceId, boolean _calibrationMode, boolean 
     deviceType = "HX711"; // The devices type definition
     selfDeviceId = _deviceId;
     chipType = "ESP8266"; // The devices chip type
+    deviceVersion = "1.0.0";
 
     initDisplay = _initDisplay;
     initStatusLed = _initStatusLed;

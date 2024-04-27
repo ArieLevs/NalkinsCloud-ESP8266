@@ -28,11 +28,6 @@ extern bool notRetained; //Set retained messages to false
 
 // DNS name to access device on STA mode
 extern String DNSName;
-extern String versionNum;
-
-extern String deviceType; // The devices type definition
-extern String deviceId; // The devices unique id
-extern String chipType; // The devices chip type
 
 struct strConfigs {
 	String wifiSsid;
@@ -42,6 +37,10 @@ struct strConfigs {
 	uint8_t Netmask[4];
 	uint8_t Gateway[4];
 	String devicePassword;
+	String deviceType;
+	String chipType;
+	String deviceId;
+	String deviceVersion;
 	String mqttServer;
 	uint16_t mqttPort;
 	String mqttFingerprint;

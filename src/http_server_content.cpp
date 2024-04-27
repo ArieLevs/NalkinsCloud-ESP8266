@@ -6,10 +6,6 @@
 
 ESP8266WebServer server;
 
-String deviceType; // The devices type definition
-String deviceId; // The devices unique id
-String chipType; // The devices chip type
-
 
 // Called when 'PAGE_GeneralSettings' is built (/)
 // Will send all relevant info to be displayed on page
@@ -18,10 +14,10 @@ void webServerGetGeneralConfigurationValues() {
     configs.mqttPort = readIntFromEEPROM(MQTT_PORT_START_ADDR); // Read device mqttPort from EEPROM and store to 'configs' struct
     configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR); // Read device password from EEPROM and store to 'configs' struct
 	String values;
-	values += "version|" + versionNum + "|input\n";
-	values += "model|" + chipType + "|input\n";
-	values += "deviceId|" + deviceId + "|input\n";
-	values += "deviceType|" + deviceType + "|input\n";
+	values += "version|" + configs.deviceVersion + "|input\n";
+	values += "model|" + configs.chipType + "|input\n";
+	values += "deviceId|" + configs.deviceId + "|input\n";
+	values += "deviceType|" + configs.deviceType + "|input\n";
 	values += "devicePassword|" + configs.devicePassword + "|input\n";
     values += "mqttServer|" + configs.mqttServer + "|input\n";
     values += "mqttPort|" + String(configs.mqttPort) + "|input\n";
@@ -83,7 +79,7 @@ void webServerGetMqttInfo() {
 	String values;
 	values += "mqttServer|" + configs.mqttServer + "|div\n";
 	values += "mqttport|" + (String) configs.mqttPort + "|div\n";
-	values += "mqttdeviceid|" + deviceId + "|div\n";
+	values += "mqttdeviceid|" + configs.deviceId + "|div\n";
 	values += "mqttpassword|" + configs.devicePassword + "|div\n";
 	values += "mqttconnectionstate|" + mqttState + "|div\n";
 	if (isSslEncrypted) {

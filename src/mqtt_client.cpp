@@ -110,7 +110,7 @@ bool checkMQTTConnection() {
 		Serial.println("Attempting MQTT connection...");
 	if (connectToMQTTBroker()) { // Try to connect to the MQTT server
 		if (DEBUG)
-			Serial.print("Successfully connected as: " + (String) deviceId.c_str());
+			Serial.println("Successfully connected as: " + (String) configs.deviceId.c_str());
         return true;
 	} else {
 		if (DEBUG)
@@ -181,12 +181,12 @@ bool connectToMQTTBroker() {
 		Serial.println("Trying connection to MQTT broker");
 		Serial.println("connecting to: '" + configs.mqttServer + "'");
 		Serial.println("port: '" +String(configs.mqttPort)+ "'");
-		Serial.print("deviceId: '" + deviceId + "', password:");
+		Serial.print("deviceId: '" + configs.deviceId + "', password: ");
 		Serial.println(configs.devicePassword.c_str());
 	}
 	// boolean connect (clientID, username, password, willTopic, willQoS, willRetain, willMessage)
     // function api https://pubsubclient.knolleary.net/api#connect
-	if (mqttClient.connect(deviceId.c_str(), configs.devicePassword.c_str(), nullptr,
+	if (mqttClient.connect(configs.deviceId.c_str(), configs.devicePassword.c_str(), nullptr,
 						   "v1/devices/me/attributes", QOS, retained, willMessage)) {
 		if (DEBUG) {
 			Serial.print("Connection successful, status: ");
