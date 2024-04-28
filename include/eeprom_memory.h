@@ -19,26 +19,28 @@
 * Bits 	36-39 	belong to wifi password Length info (4 bytes)
 * Bits 	40-71 	belong to wifi password info (32 bytes)
 *
-* MQTT
-* Bits 	72-75 	belong to MQTT server name length (4 bytes)
-* Bits 	76-107 	belong to MQTT server name (32 bytes)
-* Bits 	108-111 belong to DeviceId length (4 bytes)
-* Bits 	112-143 belong to DeviceId (32 bytes)
-* Bits 	144-147 belong to Device password length (4 bytes)
-* Bits 	148-179 belong to Device password (32 bytes)
-
-* Bit 	494 	hold data if the device is on configuration mode
-* Bits 	495-499 belong to MQTT server port
-* Bits 	256-384 belong to MQTT server port // 128bit
-
-* single bits data
-* Bits	300-306 reserved for distillery sensor data
-* - bit 301		hold if automation job executed
-* - bit 302-305	hold temperature configs
-* Bit 	500 	sets service mode flag (value 0 = public MQTT server, value 1 = local server)
-* Bit 	501 	sets DHCP status
-* Bit 	502 	sets version update mode (value 0 = not on update mode, value 1 = device on version update mode)
-* Bits 	503-510 sets Device password
+* MQTT Broker Info
+* Bits 	200 	belong to MQTT server name length (1 bytes)
+* Bits 	201-264 belong to MQTT server address (64 bytes)
+* Bits 	265     belong to MQTT server port (1 bytes)
+*
+* Device Info
+* Bits 	300     belong to DeviceId length (1 bytes)
+* Bits 	301-364 belong to DeviceId (64 bytes)
+* Bits 	365     belong to Device password length (1 bytes)
+* Bits 	366-397 belong to Device password (32 bytes)
+*
+* Static Network values
+* All addresses between 400 - 411 reserved for static network info - DO NOT USE THIS RANGE
+*
+# Sensor specific Info
+* All addresses between 412 - 499 reserved for sensor info storage - DO NOT USE THIS RANGE
+*
+* Runtime Info
+* Bit   500 	hold data if the device is on configuration mode
+* Bit 	501 	sets service mode flag (value 0 = public MQTT server, value 1 = local server)
+* Bit 	502 	sets DHCP status
+* Bit 	503 	sets version update mode (value 0 = not on update mode, value 1 = device on version update mode)
 *
 */
 #define SSID_LENGTH_START_ADDR 0
@@ -46,20 +48,23 @@
 #define WIFI_PASS_LENGTH_START_ADDR 36
 #define WIFI_PASS_START_ADDR 40
 
-#define MQTT_SERVER_LENGTH_START_ADDR 72
-#define MQTT_SERVER_START_ADDR 76
-#define DEVICE_ID_LENGTH_START_ADDR 108
-#define DEVICE_ID_START_ADDR 112
-#define DEVICE_PASS_LENGTH_START_ADDR 144
-#define DEVICE_PASS_START_ADDR 148
+#define MQTT_SERVER_LENGTH_START_ADDR 200 // Int writable variable (1 bytes)
+#define MQTT_SERVER_START_ADDR 201
+#define MQTT_SERVER_PORT_START_ADDR 265 // Int writable variable (1 bytes)
 
-// Int writable variable (4 bytes)
-#define CALIBRATION_ADDR 488
-#define CONFIGURATION_MODE_ADDR 492
-#define MQTT_PORT_START_ADDR 496
-#define SERVICE_MODE_FLAG_ADDR 500
-#define DHCP_FLAG_ADDR 504
-#define IS_TRIGGERED_ADDR 508
+#define DEVICE_ID_LENGTH_START_ADDR 300
+#define DEVICE_ID_START_ADDR 301
+#define DEVICE_PASS_LENGTH_START_ADDR 365
+#define DEVICE_PASS_START_ADDR 366
+
+// Int writable variable
+#define CONFIGURATION_MODE_ADDR 500
+#define SERVICE_MODE_FLAG_ADDR 501
+#define DHCP_FLAG_ADDR 502
+#define VER_UPDATE_FLAG_ADDR 503
+
+// defines the max allowed storage side for a single key
+#define MAX_EEPROM_DATA_SIZE 64
 
 void initEEPROM();
 

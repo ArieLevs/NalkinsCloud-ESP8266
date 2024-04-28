@@ -37,7 +37,7 @@ void setup(void) {
 	configs.deviceVersion = device->getDeviceVersion();
 	configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR);
 	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR);
-	configs.mqttPort = readIntFromEEPROM(MQTT_PORT_START_ADDR);
+	configs.mqttPort = readIntFromEEPROM(MQTT_SERVER_PORT_START_ADDR);
 
 	if (DEBUG) {
 		Serial.println("Server configs: ");

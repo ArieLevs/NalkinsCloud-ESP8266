@@ -11,7 +11,7 @@ ESP8266WebServer server;
 // Will send all relevant info to be displayed on page
 void webServerGetGeneralConfigurationValues() {
 	configs.mqttServer = readStringFromEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR); // Read device mqttServer from EEPROM and store to 'configs' struct
-    configs.mqttPort = readIntFromEEPROM(MQTT_PORT_START_ADDR); // Read device mqttPort from EEPROM and store to 'configs' struct
+    configs.mqttPort = readIntFromEEPROM(MQTT_SERVER_PORT_START_ADDR); // Read device mqttPort from EEPROM and store to 'configs' struct
     configs.devicePassword = readStringFromEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR); // Read device password from EEPROM and store to 'configs' struct
 	String values;
 	values += "version|" + configs.deviceVersion + "|input\n";

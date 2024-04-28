@@ -16,9 +16,9 @@ void initEEPROM() {
  */
 void writeStringToEEPROM(int lengthStartAddress, int startAddress, String data) {
 	unsigned int dateLength = data.length();
-	if (dateLength > 32) {
+	if (dateLength > MAX_EEPROM_DATA_SIZE) {
 		if (DEBUG) {
-			Serial.println("ERROR - data length " + String(dateLength) + " is bigger then 32, max allowed");
+			Serial.println("ERROR - data length " + String(dateLength) + " is bigger than max allowed " + String(MAX_EEPROM_DATA_SIZE));
 			Serial.println("ERROR - CANNOT WRITE DATA TO EEPROM ");
 		}
 		return;
@@ -48,7 +48,6 @@ void writeStringToEEPROM(int lengthStartAddress, int startAddress, String data) 
 
 /**
  * Read string beginning at a given address
- * Max string size in EEPROM is 32
  *
  * @param beginAddress the index value of the address start location
  *

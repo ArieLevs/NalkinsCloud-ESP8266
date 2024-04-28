@@ -33,9 +33,9 @@ void handleGeneralSaved() {
             Serial.println(server.arg("mqttPort").toInt());
         }
 
-        writeStringToEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR,devicePassword); //Save the password to EEPROM flash memory
-        writeStringToEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR,mqttServer);
-        writeIntToEEPROM(MQTT_PORT_START_ADDR, server.arg("mqttPort").toInt());
+        writeStringToEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR, devicePassword); //Save the password to EEPROM flash memory
+        writeStringToEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR, mqttServer);
+        writeIntToEEPROM(MQTT_SERVER_PORT_START_ADDR, server.arg("mqttPort").toInt());
 
         server.send_P(200, "text/html", PAGE_GeneralSettingsSaved); //And display small success redirect page
 	});
@@ -152,7 +152,7 @@ void handleAutoConfig() {
 					Serial.println("Writing MQTT config ro EEPROM");
 				// Store MQTT server info and credentials
 				writeStringToEEPROM(MQTT_SERVER_LENGTH_START_ADDR, MQTT_SERVER_START_ADDR, configs.mqttServer);
-				writeIntToEEPROM(MQTT_PORT_START_ADDR, configs.mqttPort);
+				writeIntToEEPROM(MQTT_SERVER_PORT_START_ADDR, configs.mqttPort);
 				writeStringToEEPROM(DEVICE_PASS_LENGTH_START_ADDR, DEVICE_PASS_START_ADDR, configs.devicePassword); //Save the password to flash memory
 
 				server.send(200, "text/plain",

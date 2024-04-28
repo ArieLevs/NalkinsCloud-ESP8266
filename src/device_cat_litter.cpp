@@ -5,7 +5,7 @@
 #include "device_cat_litter.h"
 
 void CatLitter::getDataFromSensor() {
-    float scale_read_value;
+    float scale_read_value = 0;
 
     if (calibrationMode) {
         scale.set_scale(calibration_factor); //Adjust to this calibration factor
@@ -30,7 +30,7 @@ void CatLitter::getDataFromSensor() {
         Serial.println("HX711 not found.");
 
     StaticJsonDocument<256> jsonDoc;
-    jsonDoc["weight_kg"] = scale_read_value;
+    jsonDoc["weight_grams"] = static_cast<int>(scale_read_value * 1000);
 
     String output;
     serializeJson(jsonDoc, output);
