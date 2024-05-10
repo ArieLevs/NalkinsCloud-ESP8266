@@ -8,11 +8,15 @@
 #include "led_blinks.h"
 #include "http_server_handler.h"
 #include "global_configs.h"
-#include "device_cat_litter.h"
+
+// #include "device_cat_litter.h"
+#include "device_dht.h"
 
 strConfigs configs;
 LedBlinks *ledBlink = nullptr;
-CatLitter *device = nullptr;
+
+// CatLitter *device = nullptr;
+DHTDevice *device = nullptr;
 
 void setup(void) {
 	delay(500);
@@ -25,7 +29,8 @@ void setup(void) {
         Serial.println("Starting NalkinsCloud Sensor");
     }
 
-    device = new CatLitter("048018f0-04aa-11ef-af4c-95c2f1842409", false, true, false, false, true);
+    // device = new CatLitter("048018f0-04aa-11ef-af4c-95c2f1842409", false, true, false, false, true);
+	device = new DHTDevice("71562250-06f1-11ef-9f91-7d818d7f7044", false, true, false, false, true);
 	ledBlink = new LedBlinks(LED_BUILTIN); // Init led blinker object LED_BUILTIN == D4 == GPIO 2
 
 	
